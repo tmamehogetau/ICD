@@ -14,6 +14,7 @@ let pendingChoice = "";
 let draftName = "";
 let draftIntent = "";
 let redrawMode = false;
+let keepAliveTimer = null;
 
 const esc = value => String(value ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[char]);
 const nl = value => esc(value).replace(/\n/g, "<br>");
@@ -125,6 +126,19 @@ function render() {
   if (!meeting) setup(); else if (meeting.stage === "lobby") lobby(); else if (meeting.stage === "round_reveal") reveal(); else if (["pass_build", "pass_vote", "pass_final_vote"].includes(meeting.stage)) pass(meeting.stage); else if (meeting.stage === "build") build(); else if (meeting.stage === "presentations") presentations(); else if (meeting.stage === "vote") vote(); else if (meeting.stage === "round_results") results(); else if (meeting.stage === "final_overview") finalOverview(); else if (meeting.stage === "final_vote") vote(true); else if (meeting.stage === "final_results") finalResults();
   if (notice) { const toast = document.createElement("div"); toast.className = "toast"; toast.textContent = notice; root.prepend(toast); notice = ""; }
   root.focus({ preventScroll: true });
+  syncKeepAlive();
+}
+function shouldKeepAlive() { return Boolean(session && meeting && meeting.stage !== "final_results"); }
+function syncKeepAlive() {
+  if (!shouldKeepAlive()) {
+    if (keepAliveTimer) window.clearInterval(keepAliveTimer);
+    keepAliveTimer = null;
+    return;
+  }
+  if (keepAliveTimer) return;
+  const ping = () => fetch("/api/keepalive", { cache: "no-store" }).catch(() => {});
+  ping();
+  keepAliveTimer = window.setInterval(ping, 5 * 60 * 1000);
 }
 function checked(name) { return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(input => input.value); }
 async function api(path, options = {}) {

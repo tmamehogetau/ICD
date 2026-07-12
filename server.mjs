@@ -31,6 +31,10 @@ function sendJson(res, status, body) {
   res.end(JSON.stringify(body));
 }
 
+function sendKeepAlive(res) {
+  sendJson(res, 200, { status: "alive", timestamp: Date.now() });
+}
+
 function cleanName(value) {
   const name = String(value || "").trim();
   if (!name || name.length > 30) throw new Error("名前は1〜30文字で入力してください。 ");
@@ -248,6 +252,7 @@ const server = createServer(async (req, res) => {
     const joinMatch = /^\/api\/rooms\/([A-Za-z0-9]+)\/join$/u.exec(pathname);
     const actionMatch = /^\/api\/rooms\/([A-Za-z0-9]+)\/actions$/u.exec(pathname);
     const stateMatch = /^\/api\/rooms\/([A-Za-z0-9]+)\/state$/u.exec(pathname);
+    if (req.method === "GET" && pathname === "/api/keepalive") return sendKeepAlive(res);
     if (req.method === "POST" && pathname === "/api/rooms") return await createRoom(req, res);
     if (req.method === "POST" && joinMatch) return await joinRoom(req, res, joinMatch[1]);
     if (req.method === "POST" && actionMatch) return await handleAction(req, res, actionMatch[1]);
