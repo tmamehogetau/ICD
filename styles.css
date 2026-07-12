@@ -1105,3 +1105,4 @@ input, textarea, select { color:#442116; background:#fff1cf; border:1px solid #a
   filter:none;
   text-shadow:0 1px 0 #164226;
 }
+.submission-feedback{margin:0;color:#7f1d1d;font-size:.78rem;font-weight:800;letter-spacing:.06em}.stamp-button.submitting{transform:rotate(-1deg) scale(.98);box-shadow:0 0 0 3px #d98a40,0 0 18px #e8bd6c}
