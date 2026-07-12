@@ -1,0 +1,1107 @@
+@import url('https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap');
+
+:root { --ink:#211d19; --muted:#6e655a; --paper:#f4efdf; --paper2:#fffaf0; --red:#9a2027; --red-dark:#641317; --blue:#23465a; --gold:#b28a3a; --desk:#25211d; --line:#c9bfa9; --shadow:0 18px 45px #08060455; font-family:"Zen Kaku Gothic New",sans-serif; color:var(--ink); background:#29241f; }
+* { box-sizing:border-box; }
+html { min-height:100%; }
+body { min-height:100vh; margin:0; padding:0 5vw; background:radial-gradient(circle at 16% 5%,#55493d 0,transparent 32%),linear-gradient(115deg,#201c18,#3b332a 50%,#211c18); }
+body::before { content:""; position:fixed; inset:0; pointer-events:none; opacity:.23; background-image:repeating-linear-gradient(92deg,transparent 0 18px,#fff1 19px,transparent 20px),repeating-linear-gradient(3deg,transparent 0 7px,#0001 8px,transparent 9px); }
+.desk-noise { position:fixed; inset:0; pointer-events:none; background:radial-gradient(circle at 5% 80%,#08070677,transparent 22%),radial-gradient(circle at 95% 22%,#08070666,transparent 19%); }
+button,input,textarea,select { font:inherit; }
+button { cursor:pointer; }
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,summary:focus-visible { outline:3px solid #e8bd4f; outline-offset:3px; }
+.skip-link { position:fixed; left:1rem; top:-5rem; z-index:99; padding:.7rem 1rem; color:#fff; background:#000; }
+.skip-link:focus { top:1rem; }
+.masthead { position:relative; max-width:1240px; margin:auto; padding:3.2rem 0 2rem; display:flex; align-items:flex-end; justify-content:space-between; color:#f8f0df; border-bottom:1px solid #f3ead833; }
+.eyebrow { margin:0 0 .45rem; color:#d7c9b5; font:700 .7rem/1.2 monospace; letter-spacing:.19em; text-transform:uppercase; }
+.masthead h1 { margin:0; font-family:"Kaisei Decol",serif; font-size:clamp(2.5rem,6vw,5.6rem); line-height:.78; letter-spacing:-.06em; }
+.masthead h1 span { color:#e3b34f; }
+.meeting-badge { width:115px; aspect-ratio:1; display:grid; place-content:center; text-align:center; border:2px solid #d8c9af; transform:rotate(3deg); box-shadow:inset 0 0 0 5px #2c2722,inset 0 0 0 6px #d8c9af; }
+.meeting-badge span,.meeting-badge small { font-size:.65rem; letter-spacing:.14em; }
+.meeting-badge strong { color:#e1b15a; font:700 1.55rem "Kaisei Decol",serif; }
+main { position:relative; max-width:1240px; min-height:58vh; margin:2.5rem auto 5rem; }
+footer { max-width:1240px; margin:auto; padding:1.2rem 0 2rem; color:#bdb1a1; border-top:1px solid #f3ead822; display:flex; justify-content:space-between; font-size:.72rem; letter-spacing:.1em; }
+.section-head { display:flex; justify-content:space-between; align-items:flex-end; margin:0 0 2rem; color:#fff8e8; }
+.section-head h2 { margin:.1rem 0 0; font:700 clamp(1.8rem,4vw,3.6rem) "Kaisei Decol",serif; letter-spacing:-.04em; }
+.round-chip { display:grid; grid-template-columns:auto auto auto; align-items:end; gap:.35rem; padding:.6rem 1rem; border:1px solid #bdad99; transform:rotate(2deg); }
+.round-chip span { grid-column:1/-1; font:.62rem monospace; letter-spacing:.2em; }
+.round-chip strong { color:#e5b553; font:700 2.5rem/1 monospace; }.round-chip small{padding-bottom:.2rem}
+.paper { position:relative; color:var(--ink); background-color:var(--paper); background-image:linear-gradient(#5548300a 1px,transparent 1px); background-size:100% 27px; box-shadow:var(--shadow); }
+.setup-sheet { max-width:850px; margin:auto; padding:clamp(1.5rem,5vw,4rem); transform:rotate(-.3deg); }
+.setup-sheet::before,.brief::before,.ballot::before { content:""; position:absolute; inset:12px; pointer-events:none; border:1px solid #796f5b66; }
+.red-note { position:absolute; z-index:2; right:2.5rem; top:1.2rem; padding:.4rem .8rem; color:var(--red); font-weight:900; border:2px solid var(--red); transform:rotate(4deg); }
+fieldset { margin:0 0 2rem; padding:0; border:0; } legend { width:100%; margin:0 0 1rem; padding-bottom:.5rem; font:700 1.1rem "Kaisei Decol",serif; border-bottom:2px solid var(--ink); }
+.name-list { display:grid; gap:.65rem; }.name-list label{display:grid;grid-template-columns:48px 1fr;align-items:center;border-bottom:1px solid var(--line)}.name-list label span{font:700 1rem monospace;color:var(--red)}
+input,textarea,select { width:100%; padding:.72rem .85rem; color:var(--ink); background:#fffaf0bb; border:1px solid #8e826b; border-radius:0; }
+.name-list input { border:0; background:transparent; font-weight:700; }
+.text-button { margin:.8rem 0 0; padding:.3rem; color:var(--red); background:none; border:0; font-weight:700; }
+.choice-row { display:grid; grid-template-columns:repeat(2,1fr); gap:1rem; }
+.radio-card { position:relative; padding:1rem 1rem 1rem 2.6rem; background:#fff8e7; border:1px solid var(--line); }.radio-card input{position:absolute;left:.9rem;top:1.1rem;width:auto;accent-color:var(--red)}.radio-card b,.radio-card span{display:block}.radio-card span{font-size:.75rem;color:var(--muted)}
+.rule-summary { display:flex; flex-wrap:wrap; gap:.7rem; margin:0 0 1.5rem; }.rule-summary span{padding:.35rem .65rem;border:1px dashed #796d58;font-size:.78rem}
+.primary,.secondary { min-height:48px; padding:.75rem 1.3rem; border:0; font-weight:900; letter-spacing:.06em; transition:transform .15s,filter .15s; }.primary{color:#fff8e8;background:var(--red)}.secondary{color:var(--ink);background:#e9deca;border:1px solid #716552}.primary:hover,.secondary:hover{transform:translateY(-2px);filter:brightness(1.08)}
+.stamp-button { border:3px double #fff8e8; box-shadow:0 0 0 3px var(--red); transform:rotate(-1deg); }
+.two-column { display:grid; grid-template-columns:minmax(300px,.9fr) minmax(280px,1.1fr); gap:clamp(1.5rem,5vw,4rem); align-items:start; }
+.base-card,.design-card { position:relative; overflow:hidden; min-height:390px; padding:1.3rem; color:#f8f0df; background:linear-gradient(145deg,#25211e,#11100f); border:8px solid #c3a45f; box-shadow:0 0 0 2px #15120f,var(--shadow); }
+.base-card::after,.design-card::after { content:""; position:absolute; right:-30px; bottom:-50px; width:180px; height:180px; border:1px solid #c8a55f33; border-radius:50%; box-shadow:0 0 0 25px #c8a55f11,0 0 0 50px #c8a55f08; }
+.card-top { position:relative; z-index:1; display:grid; grid-template-columns:60px 1fr; gap:1rem; align-items:center; padding-bottom:1rem; border-bottom:1px solid #d8c39355; }.card-top small{color:#cbbd9e;letter-spacing:.08em}.card-top h3{margin:.2rem 0 0;font:700 1.35rem/1.3 "Kaisei Decol",serif}
+.cost { display:grid; place-items:center; width:58px; height:66px; color:#fff; background:var(--blue); clip-path:polygon(50% 0,95% 24%,88% 82%,50% 100%,12% 82%,5% 24%); font:900 2rem monospace; }
+.stats { position:relative; z-index:1; display:grid; grid-template-columns:60px 1fr 60px; align-items:center; gap:.5rem; margin:1.2rem 0; text-align:center; }.stats strong{display:grid;place-items:center;width:58px;height:58px;background:#9e342b;border-radius:50%;font:900 1.65rem monospace;box-shadow:inset 0 0 0 4px #ffffff20}.stats strong:last-child{background:#35674c}.stats span{font-size:.68rem;color:#c7baa3;letter-spacing:.08em}
+.effect { position:relative; z-index:1; min-height:110px; margin:0; padding:1rem; color:#251f19; background:#f2ead8; line-height:1.8; white-space:normal; }.blank-effect{color:#8b806e;font-style:italic}
+.brief { padding:4rem clamp(1.5rem,4vw,3.5rem) 3rem; }.brief h3{font:700 1.55rem "Kaisei Decol",serif}.brief ol{padding-left:1.5rem;line-height:2.2}.brief .primary{margin-top:1.5rem;width:100%}
+.agreement { padding:.8rem 1rem; color:var(--red-dark); background:#9a202710; border-left:4px solid var(--red); font-size:.85rem; }
+.pass-screen { max-width:650px; margin:6vh auto; text-align:center; color:#f8f0df; }.pass-folder{position:relative;margin:2rem auto;width:min(100%,520px);padding:4rem 2rem 3rem;color:var(--ink);background:var(--paper);box-shadow:var(--shadow);transform:rotate(-1deg)}.pass-folder::before{content:"";position:absolute;left:0;top:-25px;width:45%;height:28px;background:var(--paper);clip-path:polygon(0 0,85% 0,100% 100%,0 100%)}.pass-folder span,.pass-folder small{display:block;color:var(--muted)}.pass-folder strong{display:block;margin:.3rem;font:700 clamp(2rem,7vw,4rem) "Kaisei Decol",serif}.pass-screen h2{font:700 1.8rem "Kaisei Decol",serif}.pass-screen .primary{margin-top:1rem}
+.build-layout { display:grid; grid-template-columns:320px 1fr; gap:2rem; align-items:start; }.build-layout aside{position:sticky;top:1rem}.base-card.compact{min-height:0;padding:1rem;border-width:5px}.compact .card-top{grid-template-columns:45px 1fr}.compact .cost{width:44px;height:50px;font-size:1.4rem}.compact .card-top h3{font-size:1rem}.compact .stats{grid-template-columns:45px 1fr 45px}.compact .stats strong{width:42px;height:42px;font-size:1.1rem}.compact .effect{font-size:.8rem;line-height:1.55;min-height:80px}
+.workspace { min-width:0; }.subhead{display:flex;justify-content:space-between;align-items:end;color:#fff8e8;margin-bottom:1rem}.subhead h3{font:700 1.5rem "Kaisei Decol",serif;margin:0}.subhead span{font-size:.75rem;color:#c9bdad}
+.hand-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; margin-bottom:1rem; }.adjust-card{position:relative;min-height:220px;padding:2.7rem 1rem 1rem;color:var(--ink);background:#eee5d3;box-shadow:0 8px 18px #0005;transform:rotate(var(--tilt,-.5deg));}.adjust-card:nth-child(even){--tilt:.7deg}.adjust-card::after{content:"";position:absolute;inset:7px;border:1px solid #7f735e55;pointer-events:none}.clip{position:absolute;left:18px;top:-7px;width:45px;height:20px;border:3px solid #726957;border-radius:50%;transform:rotate(-8deg)}.adjust-card .category{margin:.3rem 0;color:var(--red);font-size:.65rem;font-weight:900;letter-spacing:.13em}.adjust-card h4{margin:.4rem 0;font:700 1rem "Kaisei Decol",serif}.adjust-card>p:last-child{position:relative;z-index:1;font-size:.75rem;line-height:1.65}.card-controls{position:absolute;z-index:3;right:12px;top:10px;display:flex;gap:.3rem}.card-controls label{padding:.2rem .35rem;background:#fff8e8;border:1px solid #786d59;font-size:.65rem}.card-controls input{width:auto;padding:0;accent-color:var(--red)}
+.design-form { margin-top:2rem; padding:2.2rem; display:grid; gap:1.1rem; }.form-title{display:flex;justify-content:space-between;padding-bottom:.7rem;border-bottom:3px solid var(--ink);font:700 1.2rem "Kaisei Decol",serif}.form-title b{font:.7rem monospace}.design-form label{font-size:.78rem;font-weight:700}.number-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}.design-form input,.design-form textarea{margin-top:.35rem}.design-form textarea{resize:vertical}.design-form .primary{justify-self:end}
+.notice { display:flex; justify-content:space-between; gap:1rem; margin-bottom:2rem; padding:1.2rem 1.5rem; }.notice b{color:var(--red)}.notice span{font-size:.83rem}
+.design-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr)); gap:1.5rem; }.design-card{min-height:420px;border-color:#8d7b55}.design-card .author-tab{margin:-1.3rem -1.3rem 1rem;padding:.5rem 1rem;color:#271f18;background:#d8bd76;font-size:.75rem;font-weight:900}.used-adjustments{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.8rem}.used-adjustments span{padding:.2rem .4rem;color:#281f17;background:#d5bb76;font-size:.64rem}.intent{position:relative;z-index:1;font-size:.75rem;line-height:1.5}.intent b{display:block;color:#d5bb76}.center-action{margin:2.5rem 0;text-align:center}
+.ballot { max-width:760px; margin:auto; padding:clamp(2rem,5vw,4rem); }.ballot-mark{position:absolute;right:2rem;top:1rem;color:#9a202733;font:900 3rem "Kaisei Decol",serif;transform:rotate(7deg)}.ballot>label:not(.reason){position:relative;display:grid;grid-template-columns:62px 1fr minmax(180px,1.8fr);align-items:center;gap:1rem;margin-bottom:1rem;padding:1rem;border-bottom:1px solid var(--line)}.ballot label span b,.ballot label span small{display:block}.ballot label span small{color:var(--muted);font-size:.7rem}.vote-value{display:grid!important;place-items:center;width:55px;height:55px;color:#fff!important;background:var(--red);font:900 1.5rem monospace;clip-path:polygon(50% 0,100% 25%,90% 100%,10% 100%,0 25%)}.vote-value.one{background:var(--blue)}.vote-value.nerf{background:#4e4841}.reason{display:block;margin:1rem}.reason input{margin-top:.4rem}.ballot .primary{display:block;margin:2rem auto 0}.candidate-drawer{margin-top:2rem;color:#f7efde}.candidate-drawer summary{cursor:pointer;text-align:center;font-weight:700}.candidate-drawer .design-grid{margin-top:1.5rem}
+.formula { display:flex; flex-wrap:wrap; justify-content:center; gap:1rem; margin-bottom:2rem; padding:1rem; }.formula span{font-size:.75rem}.result-wrap{position:relative}.result-wrap.winner{filter:drop-shadow(0 0 18px #d7ad4a88)}.approval-stamp{position:absolute;z-index:5;right:-8px;top:-16px;width:72px;height:72px;display:grid;place-items:center;text-align:center;color:var(--red);background:#f4efdfdd;border:4px double var(--red);border-radius:50%;font-weight:900;line-height:1.05;transform:rotate(12deg)}.score-strip{position:relative;z-index:2;display:flex;align-items:center;gap:.5rem;margin:1rem -1.3rem -1.3rem;padding:.7rem 1rem;background:#d2b56d;color:#281f17}.score-strip span{font-size:.7rem}.score-strip strong{margin-left:auto;font:900 1.5rem monospace}.scoreboard{max-width:600px;margin:2.5rem auto 0;padding:1.5rem}.scoreboard h3{margin:.2rem 0 1rem;font:700 1.3rem "Kaisei Decol",serif}.scoreboard>div{display:grid;grid-template-columns:35px 1fr auto;padding:.6rem;border-top:1px solid var(--line)}.scoreboard>div span{color:var(--red);font-family:monospace}.scoreboard>div strong{font-family:monospace}
+.finalists .design-card{border-color:#d5ad50}.hero-result{padding:3rem 2rem;text-align:center}.hero-result p{font:.7rem monospace;letter-spacing:.2em}.hero-result h2{max-width:750px;margin:1rem auto;font:700 clamp(2rem,5vw,4.4rem)/1.2 "Kaisei Decol",serif;text-wrap:balance;overflow-wrap:anywhere}.giant-stamp{width:110px;height:110px;display:grid;place-items:center;margin:-5rem auto 1rem;color:var(--red);background:var(--paper);border:6px double var(--red);border-radius:50%;font:900 1.8rem/1 "Kaisei Decol",serif;transform:rotate(-8deg)}.final-ranking{max-width:760px;margin:3rem auto;padding:2rem}.final-ranking h3{font:700 1.6rem "Kaisei Decol",serif}.rank-row{display:grid;grid-template-columns:55px 1fr auto auto;gap:1rem;align-items:center;padding:1rem;border-top:1px solid var(--line)}.rank-row .rank{font:700 1.2rem monospace;color:var(--red)}.rank-row strong{font:900 1.3rem monospace}.rank-row em{padding:.2rem .4rem;color:#fff;background:var(--red);font-size:.65rem;font-style:normal}.rank-row.champion{background:#d9bc7444}
+.toast { position:fixed; z-index:100; left:50%; top:1rem; width:min(90vw,600px); transform:translateX(-50%); padding:1rem 1.2rem; color:#fff; background:var(--red-dark); border:2px solid #f7e8c8; box-shadow:0 10px 30px #0009; text-align:center; font-weight:700; animation:toast-in .2s ease-out; }@keyframes toast-in{from{transform:translate(-50%,-30px);opacity:0}}
+@media (max-width:900px){body{padding:0 3vw}.two-column,.build-layout{grid-template-columns:1fr}.build-layout aside{position:static}.build-layout aside .compact{max-width:440px}.hand-grid{grid-template-columns:repeat(2,1fr)}.masthead{padding-top:2rem}.meeting-badge{width:90px}.notice{display:block}.notice span{display:block;margin-top:.4rem}}
+@media (max-width:560px){.masthead h1{font-size:2.7rem}.meeting-badge{width:74px}.section-head{align-items:center}.section-head h2{font-size:1.7rem}.choice-row,.hand-grid{grid-template-columns:1fr}.setup-sheet{padding:4.2rem 1.2rem 1.5rem}.red-note{right:1.3rem;font-size:.7rem}.number-row{gap:.4rem}.design-form{padding:1.2rem}.ballot{padding:3rem 1rem 1.5rem}.ballot>label:not(.reason){grid-template-columns:45px 1fr;gap:.6rem}.ballot select{grid-column:1/-1}.vote-value{width:42px;height:42px;font-size:1.1rem}.rank-row{grid-template-columns:38px 1fr auto}.rank-row em{grid-column:2/-1;justify-self:start}.notice{padding:1rem}.brief{padding-top:4rem}.round-chip{transform:none}.round-chip strong{font-size:1.8rem}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+button:disabled{cursor:not-allowed;opacity:.58}
+.nerf-reasons{max-width:760px;margin:2.5rem auto 0;padding:1.5rem}.nerf-reasons h3{margin:.2rem 0 1rem;font:700 1.3rem "Kaisei Decol",serif}.nerf-reasons ul{margin:0;padding:0;list-style:none}.nerf-reasons li{display:grid;grid-template-columns:minmax(140px,1fr) 2fr auto;gap:1rem;padding:.7rem 0;border-top:1px solid var(--line)}.nerf-reasons span{color:var(--muted)}.nerf-reasons small{align-self:center}
+@media (max-width:560px){.nerf-reasons li{grid-template-columns:1fr;gap:.25rem}}
+/* 原案カードはDCGの定番レイアウト：攻撃・体力を左右下角の宝石に置く */
+.base-card:not(.compact) { padding-bottom:1.35rem; }
+.base-card:not(.compact) .effect { min-height:172px; margin:1.2rem 0 76px; }
+.base-card:not(.compact) .stats { position:absolute; z-index:2; left:1.15rem; right:1.15rem; bottom:1.1rem; display:block; height:58px; margin:0; pointer-events:none; }
+.base-card:not(.compact) .stats strong { position:absolute; bottom:0; display:grid; place-items:center; width:62px; height:62px; border-radius:0; clip-path:polygon(50% 0,91% 17%,100% 58%,72% 100%,28% 100%,0 58%,9% 17%); border:0; box-shadow:inset 0 0 0 4px #ffffff33,0 3px 8px #0009; font-size:1.75rem; }
+.base-card:not(.compact) .stats strong:first-child { left:0; background:linear-gradient(145deg,#d54c42,#7d1f1d); }
+.base-card:not(.compact) .stats strong:last-child { right:0; background:linear-gradient(145deg,#4f9a68,#214d34); }
+.base-card:not(.compact) .stats span { position:absolute; left:74px; right:74px; bottom:13px; color:#cfc2aa; font-size:.62rem; letter-spacing:.12em; }
+
+/* 全カード種別で、攻撃・体力は左右下角の宝石として統一する */
+.base-card:not(.compact),
+.design-card { padding-bottom:92px; }
+
+.base-card:not(.compact) .stats,
+.design-card .stats { position:absolute; z-index:4; left:1.15rem; right:1.15rem; bottom:1.1rem; display:block; height:62px; margin:0; pointer-events:none; }
+
+.base-card:not(.compact) .stats strong,
+.design-card .stats strong { position:absolute; bottom:0; display:grid; place-items:center; width:62px; height:62px; border:0; border-radius:0; clip-path:polygon(50% 0,91% 17%,100% 58%,72% 100%,28% 100%,0 58%,9% 17%); box-shadow:inset 0 0 0 4px #ffffff33,0 3px 8px #0009; font-size:1.75rem; }
+
+.base-card:not(.compact) .stats strong:first-child,
+.design-card .stats strong:first-child { left:0; background:linear-gradient(145deg,#d54c42,#7d1f1d); }
+
+.base-card:not(.compact) .stats strong:last-child,
+.design-card .stats strong:last-child { right:0; background:linear-gradient(145deg,#4f9a68,#214d34); }
+
+.base-card:not(.compact) .stats span,
+.design-card .stats span { position:absolute; left:74px; right:74px; bottom:13px; color:#cfc2aa; font-size:.62rem; letter-spacing:.12em; }
+
+.design-card .effect { margin-bottom:1rem; }
+
+/* 制作画面の縮小原案も同じ下角ステータス構成にする */
+.base-card.compact { padding-bottom:64px; }
+.base-card.compact .effect { margin:.8rem 0 48px; }
+.base-card.compact .stats { position:absolute; z-index:4; left:.8rem; right:.8rem; bottom:.65rem; display:block; height:42px; margin:0; pointer-events:none; }
+.base-card.compact .stats strong { position:absolute; bottom:0; display:grid; place-items:center; width:44px; height:44px; border:0; border-radius:0; clip-path:polygon(50% 0,91% 17%,100% 58%,72% 100%,28% 100%,0 58%,9% 17%); box-shadow:inset 0 0 0 3px #ffffff33,0 2px 5px #0009; font-size:1.12rem; }
+.base-card.compact .stats strong:first-child { left:0; background:linear-gradient(145deg,#d54c42,#7d1f1d); }
+.base-card.compact .stats strong:last-child { right:0; background:linear-gradient(145deg,#4f9a68,#214d34); }
+.base-card.compact .stats span { position:absolute; left:50px; right:50px; bottom:8px; color:#cfc2aa; font-size:.5rem; letter-spacing:.06em; }
+
+/* ブロック編集型のデザインフェイズ */
+.block-editor .workspace { min-width:0; }
+.editor-board { display:grid; grid-template-columns:minmax(340px,1fr) minmax(320px,.9fr); gap:1.5rem; align-items:start; }
+.plan-workspace { position:sticky; top:1rem; }
+.plan-name { display:block; margin:0 0 .8rem; color:#f7eedc; font-size:.8rem; font-weight:800; }
+.plan-name input { margin-top:.35rem; }
+.planned-effect { display:grid; gap:.5rem; min-height:150px; background:#f2ead8; }
+.effect-block { display:block; width:100%; padding:.65rem .75rem; color:#2b241c; background:#fffaf0; border:1px solid #796d58; text-align:left; line-height:1.65; }
+.effect-block small { display:block; margin-bottom:.25rem; color:#9d302d; font:700 .58rem monospace; letter-spacing:.1em; }
+.effect-block.targetable { cursor:pointer; outline:2px dashed #b64035; outline-offset:2px; transition:transform .15s,background .15s; }
+.effect-block.targetable:hover { background:#ffe8b2; transform:translateX(3px); }
+.placement-panel { margin:1rem 0; padding:1rem; }
+.placement-panel h3 { margin:.2rem 0 .5rem; font:700 1.1rem "Kaisei Decol",serif; }.placement-panel h3 small{font:.7rem sans-serif;color:#786d59}.placement-panel p{font-size:.8rem;line-height:1.6}
+.target-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.45rem; margin:1rem 0; }
+.number-target { display:flex; align-items:center; justify-content:space-between; gap:.4rem; min-height:48px; padding:.45rem; color:#31261c; background:#fffaf0; border:1px solid #897a62; text-align:left; }
+.number-target.selected { color:#fffaf0; background:#8e302b; border-color:#5d1515; }.number-target strong{font:900 1.1rem monospace}.number-target input{width:52px;margin:0;padding:.2rem}.placement-actions{display:flex;justify-content:flex-end;gap:.6rem}.compact-choice{margin: .7rem 0}.compact-choice .radio-card{padding:.45rem .7rem}.apply-card{padding:.25rem .4rem;border:1px solid #756957;background:#fff8e8;color:#33291e;font-size:.65rem;font-weight:800}.apply-card:disabled{opacity:.45}.application-log{margin:1rem 0;padding:1rem}.application-log h3{margin:0 0 .6rem;font-size:1rem}.application-log div{display:flex;justify-content:space-between;gap:.5rem;padding:.35rem 0;border-top:1px dashed #8a7c67;font-size:.75rem}.application-log button{border:0;color:#8e302b;background:transparent;font-weight:800}
+@media (max-width:1050px){.editor-board{grid-template-columns:1fr}.plan-workspace{position:static;order:-1}.block-editor .hand-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.planned-effect .effect-block { padding:.55rem; background:#fffaf0; border:1px solid #796d58; }
+.planned-effect .effect-block > button { width:100%; padding:0; color:#2b241c; background:transparent; border:0; text-align:left; line-height:1.65; }
+.planned-effect .effect-block > textarea { width:100%; margin-top:.5rem; padding:.45rem; border:1px dashed #9d302d; resize:vertical; }
+.add-block { padding:.55rem; color:#6d251f; background:#fff4d8; border:1px dashed #9d302d; font-weight:800; }
+
+/* 原案は別掲せず、完成予定に差分を赤字で重ねる */
+.block-editor.build-layout { grid-template-columns:1fr; }
+.plan-card .change-mark { color:#c62921; font-weight:900; text-shadow:0 1px #fff; }
+.plan-card .changed-value { color:#b82720; background:#fff1e6; box-shadow:inset 0 0 0 3px #b8272077; text-shadow:none; }
+.plan-card .cost.changed-value { background:#fff1e6; color:#b82720; }
+.plan-card .author-tab { color:#b82720; }
+
+.exchange-sheet { position:relative; padding:3rem 2rem 2rem; }
+.exchange-sheet h3 { font:700 1.35rem "Kaisei Decol",serif; }
+
+/* ベーシックは常時表示のまま、配置先選択だけを担うコンパクトなチップにする */
+.basic-strip { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:.45rem; margin-bottom:1.25rem; }
+.basic-chip { display:grid; grid-template-columns:auto 1fr; align-items:baseline; column-gap:.4rem; min-height:52px; padding:.45rem .55rem; color:#33281d; background:#eee5d3; border:1px solid #82745e; text-align:left; }
+.basic-chip small { color:#9d302d; font-size:.58rem; font-weight:900; letter-spacing:.08em; }.basic-chip b{font:700 .82rem "Kaisei Decol",serif}.basic-chip span{grid-column:1 / -1;overflow:hidden;color:#665a49;font-size:.62rem;line-height:1.35;text-overflow:ellipsis;white-space:nowrap}.basic-chip:hover{background:#fff4d8;transform:translateY(-1px)}.basic-chip:disabled{opacity:.45;text-decoration:line-through}
+
+.exchange-card { cursor:pointer; transition:transform .15s,box-shadow .15s; }
+.exchange-card:hover { transform:translateY(-3px); }
+.exchange-card.selected { outline:4px solid #b82720; outline-offset:3px; box-shadow:0 0 0 8px #b8272033,0 10px 20px #0007; }
+.exchange-card.selected::before { content:"交換"; position:absolute; z-index:5; right:10px; top:10px; padding:.25rem .45rem; color:#fff7e4; background:#b82720; font-size:.68rem; font-weight:900; }
+
+/* 数値プラス／マイナスは、選択ボタンと配分入力を分離する */
+.number-target { display:block; min-height:0; padding:0; overflow:hidden; }.number-target > button{display:flex;width:100%;min-height:48px;align-items:center;justify-content:space-between;gap:.4rem;padding:.45rem;color:#31261c;background:#fffaf0;border:0;text-align:left}.number-target.selected > button{color:#fffaf0;background:#8e302b}.number-target > label{display:flex;align-items:center;justify-content:space-between;padding:.35rem .45rem;background:#f2e6d2;font-size:.68rem}.number-target > label input{width:58px;margin:0;padding:.2rem}.number-target.selected > label{color:#3a271d;background:#ffe0b0}
+
+/* 調整フェーズでは通常調整カードもカード全体を選択する */
+.adjustment-choice { cursor:pointer; transition:transform .15s,box-shadow .15s; }
+.adjustment-choice:hover { transform:translateY(-3px); box-shadow:0 12px 22px #0008; }
+.adjustment-choice.disabled { cursor:not-allowed; opacity:.45; }
+.adjustment-choice .card-controls { display:none; }
+
+.submitted-sheet {
+  position: relative;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 1.5rem;
+}
+.submitted-sheet > h2, .submitted-sheet > .agreement { text-align: center; }
+.submitted-sheet .design-card { max-width: 430px; margin: 1.4rem auto; }
+.submitted-stamp {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  border: 3px solid var(--red, #b83232);
+  color: var(--red, #b83232);
+  border-radius: 50%;
+  font-weight: 800;
+  padding: .75rem .45rem;
+  transform: rotate(12deg);
+}
+
+.evaluation-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
+  gap: 1.25rem;
+  align-items: start;
+}
+.evaluation-cards .notice { margin-bottom: 1rem; }
+.evaluation-ballot {
+  position: sticky;
+  top: 1rem;
+  margin: 0;
+}
+@media (max-width: 860px) {
+  .evaluation-workspace { display: block; }
+  .evaluation-ballot { position: static; margin-top: 1.25rem; }
+}
+
+/* 居酒屋の座敷卓：全フェーズで共有する夜の配色と質感 */
+:root {
+  --ink: #2b1710;
+  --muted: #715345;
+  --paper: #f4dfb7;
+  --paper2: #fff2d1;
+  --red: #ad3024;
+  --red-dark: #6d1d17;
+  --blue: #174d5e;
+  --gold: #d59a36;
+  --desk: #3d1d11;
+  --line: #b88758;
+  --shadow: 0 17px 32px #1d0900a6;
+}
+html { background:#1d0a04; }
+body {
+  padding:0 clamp(1rem,5vw,5rem);
+  color:#33180e;
+  background:
+    radial-gradient(ellipse at 12% -8%, #f5b84b55 0 12%, transparent 27%),
+    radial-gradient(ellipse at 88% 3%, #e54a2750 0 11%, transparent 25%),
+    repeating-linear-gradient(92deg, #3d1c0d 0 4px, #542612 5px 8px, #311308 9px 15px),
+    #2e1007;
+}
+body::before {
+  opacity:.42;
+  background-image:
+    repeating-radial-gradient(ellipse at 50% 0%, transparent 0 19px, #08020132 20px 22px),
+    linear-gradient(90deg, transparent 0 18%, #f8cc7a09 20%, transparent 23% 76%, #0a020130 80%, transparent 83%);
+  mix-blend-mode:screen;
+}
+body::after {
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:linear-gradient(90deg, #07010077, transparent 21% 79%, #07010077), radial-gradient(ellipse at 50% 100%, transparent 40%, #09020088 100%);
+}
+.masthead {
+  max-width:1340px;
+  min-height:146px;
+  margin:0 auto;
+  padding:2.35rem clamp(1rem,3vw,3.25rem) 1.55rem;
+  border:0;
+  border-bottom:5px solid #d79c38;
+  background:
+    linear-gradient(90deg, #571c12ee, #39120bee 48%, #50170cee),
+    repeating-linear-gradient(0deg, #ffffff08 0 1px, transparent 1px 20px);
+  box-shadow:0 13px 28px #12030088, inset 0 -2px #ffca6866;
+}
+.masthead::before,
+.masthead::after {
+  content:"";
+  position:absolute;
+  top:0;
+  width:clamp(30px,6vw,72px);
+  height:100%;
+  background:repeating-linear-gradient(90deg,#7d2919 0 2px,#b04425 3px 6px,#6a2014 7px 10px);
+  opacity:.92;
+}
+.masthead::before { left:0; clip-path:polygon(0 0,100% 0,82% 100%,0 100%); }
+.masthead::after { right:0; clip-path:polygon(0 0,100% 0,100% 100%,18% 100%); }
+.eyebrow { color:#ffd889; font:800 .66rem/1.2 "Zen Kaku Gothic New",sans-serif; letter-spacing:.24em; }
+.masthead h1 { color:#fff0c7; text-shadow:0 3px #5d150d, 0 8px 14px #10010099; letter-spacing:.01em; }
+.masthead h1 span { color:#f6b63f; }
+.meeting-badge {
+  width:128px;
+  border:3px solid #f6ca75;
+  border-radius:50%;
+  color:#ffe8b3;
+  background:#8d251bcc;
+  box-shadow:inset 0 0 0 4px #722015, inset 0 0 0 6px #e1a140, 0 7px 12px #16030099;
+  transform:rotate(7deg);
+}
+.meeting-badge strong { color:#fff0c7; font-size:1.05rem; }
+main { max-width:1340px; margin:2.3rem auto 5rem; }
+footer { max-width:1340px; padding:1.15rem 1.3rem; color:#f2c883; border-top:2px solid #9a5729; background:#210b05cc; }
+.section-head { padding:1rem 1.4rem 1.15rem; margin-bottom:1.45rem; color:#fff0d1; background:linear-gradient(90deg,#661c13ee,#3d130bea); border-left:8px solid #dca039; box-shadow:0 8px 15px #12020066; }
+.section-head h2 { text-shadow:0 3px #4d120b; }
+.round-chip { padding:.55rem .8rem; color:#ffe4a0; border:2px solid #f0b84b; background:#3f130bf2; box-shadow:inset 0 0 0 3px #742218; }
+.round-chip strong { color:#ffcb51; }
+.paper {
+  color:#3c1f12;
+  background-color:#f5dfb5;
+  background-image:repeating-linear-gradient(0deg, transparent 0 25px, #ba794422 26px 27px), linear-gradient(90deg,#f7e8c8,#edd2a0);
+  border:1px solid #a36a3c;
+  box-shadow:var(--shadow), inset 0 0 0 5px #fff2d055;
+}
+.paper::after { content:""; position:absolute; inset:6px; pointer-events:none; border:1px dashed #9e633844; }
+.setup-sheet, .exchange-sheet, .submitted-sheet { border-radius:5px; }
+.red-note { color:#ffefd1; background:#ad3024; border:2px solid #ffcf72; box-shadow:3px 4px #50130d; }
+legend, .form-title { border-color:#9a4c28; }
+input, textarea, select { color:#442116; background:#fff1cf; border:1px solid #ad784d; box-shadow:inset 0 1px #fff; }
+.primary, .secondary { border-radius:2px; box-shadow:0 4px 0 #581610, 0 8px 15px #32100666; }
+.primary { color:#fff3d5; background:linear-gradient(#c64830,#941f19); border:1px solid #f2b957; }
+.secondary { color:#522615; background:linear-gradient(#f4cf7c,#d59538); border:1px solid #86511f; box-shadow:0 4px 0 #89501e, 0 8px 15px #32100655; }
+.primary:hover, .secondary:hover { filter:saturate(1.15) brightness(1.1); transform:translateY(-2px) rotate(-.4deg); }
+.agreement { color:#7a251b; background:#ffdba455; border-left-color:#c44028; }
+.brief { border-top:8px solid #ad3024; }
+.pass-screen { color:#ffe8bd; }.pass-folder { background:linear-gradient(90deg,#f8e6bb,#efd2a0); border-top:6px solid #a93425; }.pass-folder::before { background:#efd2a0; }
+.base-card, .design-card {
+  border:7px solid #d49638;
+  border-radius:8px;
+  color:#fff1d2;
+  background:
+    radial-gradient(circle at 20% 12%, #a64a2e44, transparent 30%),
+    linear-gradient(145deg,#532014,#210b08 61%,#40170e);
+  box-shadow:0 0 0 2px #6e2d17, 0 14px 28px #150400bb;
+}
+.base-card::before, .design-card::before { content:""; position:absolute; inset:9px; border:1px solid #f5cf7655; pointer-events:none; }
+.base-card::after, .design-card::after { border-color:#e4a74433; }
+.card-top { border-bottom-color:#f5cc7655; }.card-top small { color:#e9c18a; }
+.card-top h3 { color:#fff0cd; }
+.cost { color:#fff6db; background:linear-gradient(145deg,#176c75,#103b54); box-shadow:inset 0 0 0 3px #f2d18a33; }
+.effect { color:#412116; background:#ffe9bd; border:1px solid #c08043; box-shadow:inset 0 0 20px #9c572522; }
+.base-card:not(.compact) .stats strong:first-child, .design-card .stats strong:first-child { background:linear-gradient(145deg,#d7523b,#861c16); }
+.base-card:not(.compact) .stats strong:last-child, .design-card .stats strong:last-child { background:linear-gradient(145deg,#579e5d,#265c39); }
+.adjust-card { color:#432115; background:linear-gradient(135deg,#f3d99e,#e7bd6f); border:1px solid #9b5a2d; box-shadow:0 9px 16px #1a0700aa; }
+.adjust-card::after { border-color:#8c4f2e88; }.adjust-card .category { color:#9c281f; }.adjust-card h4 { color:#572014; }
+.adjust-card::before { content:""; position:absolute; right:12px; bottom:12px; width:28px; height:28px; border:2px solid #a63624; border-radius:50%; opacity:.65; }
+.clip { border-color:#9a652f; }
+.basic-chip { color:#4a2313; background:#f0ca7d; border-color:#a85e2e; box-shadow:0 3px 0 #a15b2b; }.basic-chip:hover { background:#ffe0a0; }
+.subhead { color:#ffe8bd; }.subhead span { color:#e7ba7a; }
+.application-log { background:#f7e3b9; }.application-log button { color:#a82d22; }
+.placement-panel { border-left:7px solid #b23726; }.number-target { border-color:#b16d40; }.number-target > button { background:#fff0cd; }.number-target.selected > button { background:#a92e23; }.number-target.selected > label { background:#ffd191; }
+.plan-card .author-tab, .design-card .author-tab { color:#fff1cf; background:linear-gradient(90deg,#a82e22,#d36b30); }.used-adjustments span { color:#fff5d7; background:#8e2a1e; }
+.formula, .scoreboard, .final-ranking, .nerf-reasons { border-top:7px solid #b63524; }
+.score-strip { color:#4c2614; background:linear-gradient(90deg,#e6a83e,#f6cf7c); }
+.giant-stamp, .submitted-stamp { color:#a72c21; background:#ffe8bc; border-color:#b43326; box-shadow:0 4px 9px #42100755; }
+.evaluation-ballot { border-top:8px solid #bd3a27; }
+.toast { color:#fff3d6; background:#7d1f18; border-color:#f5bd50; }
+@media (max-width:560px) {
+  body { padding:0 .7rem; }
+  .masthead { min-height:116px; padding:1.65rem 1rem 1rem; }
+  .masthead::before, .masthead::after { width:26px; }
+  .meeting-badge { width:80px; font-size:.6rem; }
+  .meeting-badge strong { font-size:.7rem; }
+  .section-head { padding:.75rem .8rem; border-left-width:5px; }
+}
+
+/* 一覧と品評を同じ卓に置く。評価札は横組みで読みやすくする */
+.evaluation-workspace {
+  grid-template-columns: minmax(0, 1fr) minmax(22rem, 25rem);
+  gap: 1.5rem;
+}
+.evaluation-ballot {
+  padding: 1.45rem 1.15rem 1.2rem;
+  overflow: hidden;
+}
+.evaluation-ballot .ballot-mark {
+  right: 1rem;
+  top: .55rem;
+  font-size: 2.15rem;
+}
+.evaluation-ballot > label:not(.reason) {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: .45rem .7rem;
+  align-items: center;
+  margin: 0;
+  padding: .8rem 0;
+}
+.evaluation-ballot > label:not(.reason) select {
+  grid-column: 1 / -1;
+  min-width: 0;
+  padding: .65rem .7rem;
+}
+.evaluation-ballot .vote-value {
+  width:44px;
+  height:44px;
+  font-size:1.16rem;
+}
+.evaluation-ballot .reason { margin:.55rem 0; font-size:.76rem; }
+.evaluation-ballot .reason input { min-width:0; }
+.evaluation-ballot .agreement { margin:.5rem 0 0; padding:.55rem .7rem; font-size:.72rem; }
+.evaluation-ballot .primary { width:100%; margin:1rem 0 0; }
+@media (max-width: 1040px) {
+  .evaluation-workspace { grid-template-columns: minmax(0, 1fr) 20rem; gap:1rem; }
+}
+@media (max-width: 860px) {
+  .evaluation-workspace { display:block; }
+  .evaluation-ballot { max-width:620px; margin:1.25rem auto 0; }
+}
+
+/* 提出カードはカード名と能力に集中させる */
+.design-card:not(.plan-card) { min-height: 300px; padding-bottom: 1.3rem; }
+.design-card:not(.plan-card) .effect { min-height: 145px; margin: 1.1rem 0 .7rem; }
+.design-card:not(.plan-card) .score-strip { margin: 1rem -1.3rem -1.3rem; }
+
+/* 提出カードの攻撃／体力アイコンは残す */
+.design-card:not(.plan-card) { min-height:390px; padding-bottom:92px; }
+.design-card:not(.plan-card) .effect { min-height:145px; margin:1.1rem 0 1rem; }
+
+/* 提出カード専用：伝説級の幻想カードフレーム */
+.legend-card {
+  --legend-gold: #f8dc84;
+  --legend-bright: #fff3bf;
+  --legend-violet: #7b3ca8;
+  --legend-deep: #170821;
+  overflow: visible;
+  border: 5px solid var(--legend-gold);
+  border-radius: 13px 13px 18px 18px;
+  background:
+    radial-gradient(circle at 50% 23%, #b66aff33 0 10%, transparent 37%),
+    radial-gradient(circle at 8% 84%, #ce8aff22 0 2%, transparent 18%),
+    radial-gradient(circle at 92% 84%, #ce8aff22 0 2%, transparent 18%),
+    linear-gradient(150deg, #3a0d4a 0%, #160722 47%, #331044 100%);
+  box-shadow:
+    0 0 0 2px #42205f,
+    0 0 0 5px #0a0610,
+    0 14px 28px #09000dcc,
+    0 0 18px #bd7aff66;
+}
+.legend-card::before {
+  content:"";
+  position:absolute;
+  z-index:2;
+  inset:5px;
+  border:1px solid #fff2b888;
+  border-radius:9px 9px 14px 14px;
+  pointer-events:none;
+  box-shadow:inset 0 0 0 3px #762fa533, inset 0 0 18px #e6b4ff22;
+}
+.legend-card::after {
+  content:"✦";
+  z-index:5;
+  right:12px;
+  bottom:78px;
+  display:grid;
+  place-items:center;
+  width:27px;
+  height:27px;
+  color:#fff3bd;
+  background:radial-gradient(circle,#b56cff 0 18%,#441365 20% 56%,#f4d176 59% 64%,#240936 66%);
+  border:1px solid #fff0ab;
+  border-radius:50%;
+  box-shadow:0 0 10px #e7b9ff;
+  font-size:.72rem;
+}
+.legend-card .author-tab {
+  position:relative;
+  z-index:4;
+  margin:-1.3rem -1.3rem .9rem;
+  padding:.48rem 1rem .55rem;
+  color:#fff2be;
+  background:linear-gradient(90deg,#4d1568,#8c3caa 50%,#421052);
+  border-bottom:1px solid #f7d982aa;
+  box-shadow:inset 0 -2px #2a073c;
+}
+.legend-card .card-top {
+  position:relative;
+  z-index:3;
+  padding:.2rem .35rem .85rem;
+  border-bottom-color:#f8dc8466;
+}
+.legend-card .card-top h3 { color:#fff1bc; text-shadow:0 2px #25052f,0 0 12px #d389ff88; }
+.legend-card .card-top small { color:#e5c9ff; }
+.legend-card .cost {
+  background:radial-gradient(circle at 35% 28%,#dffaff 0 9%,#4ca4d1 19%,#185786 52%,#102d61 70%);
+  border:2px solid #d4f4ff;
+  filter:drop-shadow(0 0 6px #79c5f4aa);
+}
+.legend-card .effect {
+  position:relative;
+  z-index:3;
+  color:#291334;
+  background:
+    linear-gradient(90deg,#f0d991,#fff1bc 18% 82%,#e9c776),
+    #f7e4a6;
+  border:2px solid #9c6d2d;
+  border-radius:4px;
+  box-shadow:inset 0 0 0 2px #fff7d466, inset 0 0 15px #9a5a3522;
+}
+.legend-card .stats { z-index:6; }
+.legend-card .stats strong:first-child { background:linear-gradient(145deg,#f36555,#971d20); border:2px solid #ffd78a; }
+.legend-card .stats strong:last-child { background:linear-gradient(145deg,#61b976,#176448); border:2px solid #d8f0a4; }
+.legend-card .stats span { display:none; }
+.legend-card .score-strip { position:relative; z-index:7; background:linear-gradient(90deg,#f5c855,#f9e49b,#d88b39); border-top:1px solid #fff0a4; }
+.legend-card:hover { transform:translateY(-3px); filter:brightness(1.07) saturate(1.08); }
+@media (prefers-reduced-motion:no-preference) {
+  .legend-card { animation:legend-glow 3.8s ease-in-out infinite; }
+  @keyframes legend-glow { 50% { box-shadow:0 0 0 2px #6e3c8e,0 0 0 5px #0a0610,0 14px 28px #09000dcc,0 0 25px #db9fff99; } }
+}
+
+/* 指定アイコン：提出カードは緑のコスト、青い剣、赤い盾 */
+.legend-card {
+  border: 6px solid transparent;
+  background:
+    radial-gradient(circle at 50% 23%, #c987ff2b 0 11%, transparent 38%),
+    linear-gradient(150deg, #3a0d4a 0%, #160722 47%, #331044 100%) padding-box,
+    linear-gradient(135deg, #ffd3df 0%, #ffe6ab 17%, #c4f0cf 34%, #bfe7ff 51%, #d6c5ff 68%, #ffd0e4 84%, #fff0b6 100%) border-box;
+  box-shadow:0 0 0 2px #fff3ff88,0 0 0 5px #24102f,0 14px 28px #09000dcc,0 0 19px #cfb4ff99;
+}
+.legend-card .cost {
+  width:58px;
+  height:58px;
+  border:3px solid #d9ffd3;
+  border-radius:50%;
+  clip-path:none;
+  background:radial-gradient(circle at 35% 28%,#e2ffd5 0 9%,#81d66f 19%,#2c8d4f 52%,#145334 72%);
+  box-shadow:inset 0 0 0 3px #ffffff44,0 0 7px #a9ff91aa;
+}
+.legend-card .stats strong:first-child {
+  width:64px;
+  height:64px;
+  color:#e9f8ff;
+  background:linear-gradient(145deg,#57b9ed,#14569d 69%,#0b326e);
+  border:2px solid #c7efff;
+  clip-path:polygon(42% 0,58% 0,58% 49%,82% 68%,100% 68%,100% 84%,62% 84%,54% 100%,46% 100%,38% 84%,0 84%,0 68%,18% 68%,42% 49%);
+  box-shadow:inset 0 0 0 3px #ffffff33,0 2px 7px #0009,0 0 7px #68c9ffaa;
+}
+.legend-card .stats strong:last-child {
+  width:64px;
+  height:64px;
+  color:#fff2ed;
+  background:linear-gradient(145deg,#f16c62,#b3262d 68%,#76151f);
+  border:2px solid #ffd3c4;
+  clip-path:polygon(50% 0,92% 15%,84% 67%,50% 100%,16% 67%,8% 15%);
+  box-shadow:inset 0 0 0 3px #ffffff33,0 2px 7px #0009,0 0 7px #ff9388aa;
+}
+
+/* 攻撃アイコン：数字を覆わない、太く読みやすい剣形 */
+.legend-card .stats strong:first-child {
+  width:68px;
+  height:68px;
+  clip-path:polygon(50% 0,82% 32%,69% 51%,88% 58%,88% 76%,64% 76%,55% 100%,45% 100%,36% 76%,12% 76%,12% 58%,31% 51%,18% 32%);
+  font-size:1.62rem;
+}
+
+/* 提出カード本体も淡い虹色のパール調へ */
+.legend-card {
+  color:#352143;
+  background:
+    radial-gradient(circle at 16% 16%, #ffffffcc 0 4%, transparent 19%),
+    radial-gradient(circle at 84% 80%, #ffffffaa 0 3%, transparent 22%),
+    linear-gradient(135deg,#ffe2ee 0%,#fff1bd 19%,#d9f4df 38%,#d9f0ff 56%,#e7dcff 74%,#ffddec 100%) padding-box,
+    linear-gradient(135deg,#ffd3df 0%,#ffe6ab 17%,#c4f0cf 34%,#bfe7ff 51%,#d6c5ff 68%,#ffd0e4 84%,#fff0b6 100%) border-box;
+  box-shadow:0 0 0 2px #fff8ffcc,0 0 0 5px #7b699266,0 14px 28px #16072199,0 0 19px #e7bdff99;
+}
+.legend-card::before { border-color:#ffffffdd; box-shadow:inset 0 0 0 3px #ffffff66, inset 0 0 18px #b98cff55; }
+.legend-card .author-tab { color:#fff6df; background:linear-gradient(90deg,#79558d,#b87aa8 49%,#6b6ca7); border-bottom-color:#fff6c4; }
+.legend-card .card-top { border-bottom-color:#73568066; }
+.legend-card .card-top h3 { color:#382044; text-shadow:0 1px #fff8ff,0 0 8px #ffffffbb; }
+.legend-card .card-top small { color:#574064; }
+
+/* 参照イメージの構成：白金外枠・上部アーチ・下部中央宝石 */
+.legend-card {
+  border:8px solid #fffdf8;
+  border-radius:11px 11px 17px 17px;
+  box-shadow:0 0 0 2px #ce9bff,0 0 0 4px #93e6ed,0 0 0 6px #fff8dc,0 14px 28px #16072199,0 0 19px #e7bdff99;
+}
+.legend-card::before {
+  inset:7px;
+  border:2px solid transparent;
+  border-radius:5px 5px 12px 12px;
+  background:linear-gradient(135deg,#ffcedf,#ffe9a5,#cbf3d8,#beeaff,#ded0ff,#ffd7ec) border-box;
+  -webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+  box-shadow:none;
+}
+.legend-card .author-tab {
+  overflow:visible;
+  margin:-1.3rem -1.3rem .95rem;
+  border:2px solid #fff5c9;
+  border-radius:4px 4px 8px 8px;
+  box-shadow:0 2px 0 #512a6f;
+}
+.legend-card .author-tab::before {
+  content:"";
+  position:absolute;
+  z-index:-1;
+  top:-28px;
+  left:10%;
+  right:10%;
+  height:37px;
+  border:3px solid #fffdf7;
+  border-bottom:0;
+  border-radius:54% 54% 0 0;
+  background:linear-gradient(90deg,#8a59e6,#89e2ed 28%,#fff0b2 50%,#94e7dc 72%,#b080e9) padding-box;
+  box-shadow:0 -1px 0 #7d57aa,0 0 8px #d9beff;
+}
+.legend-card::after {
+  right:calc(50% - 14px);
+  bottom:71px;
+  width:28px;
+  height:28px;
+  color:transparent;
+  border:2px solid #fff7c6;
+  border-radius:4px;
+  clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);
+  background:linear-gradient(135deg,#f7e59a,#74e5e5 45%,#b581ef 72%,#ffc8dc);
+  box-shadow:0 0 0 2px #7b4a99,0 0 11px #f1d6ff;
+}
+.legend-card .cost { z-index:7; }
+.legend-card .stats strong { z-index:7; }
+
+/* 参照のシルエットへ再構成：白金額縁、上部アーチ、下部の大きなステータス */
+.legend-card {
+  min-height:520px;
+  padding:4.8rem 1.35rem 6.5rem;
+  border:8px solid #fffdf7;
+  border-radius:24px 24px 14px 14px;
+  color:#2b1e31;
+  background:linear-gradient(155deg,#c8eff5 0%,#fff6d5 47%,#e9d6ff 100%) padding-box;
+  box-shadow:0 0 0 2px #332042,0 0 0 5px #f5dcff,0 0 0 7px #4d285d,0 16px 31px #13051aaa;
+}
+.legend-card::before {
+  inset:10px;
+  z-index:1;
+  border:2px solid #c891ff;
+  border-radius:16px 16px 8px 8px;
+  background:none;
+  -webkit-mask:none;
+  mask:none;
+  box-shadow:inset 0 0 0 2px #f8fbff, inset 0 0 0 4px #78dbe966;
+}
+.legend-card .author-tab {
+  position:absolute;
+  z-index:6;
+  top:25px;
+  left:11%;
+  right:5%;
+  height:42px;
+  margin:0;
+  padding:.7rem 1.2rem .45rem;
+  color:#fff6e4;
+  background:linear-gradient(90deg,#733244,#9f4b60 45%,#713044);
+  border:2px solid #fff7d5;
+  border-radius:4px 7px 7px 4px;
+  box-shadow:0 2px 0 #51263d,0 0 0 2px #7d4154;
+}
+.legend-card .author-tab::before {
+  z-index:-1;
+  top:-29px;
+  left:-10%;
+  right:-3%;
+  height:35px;
+  border:3px solid #fffdf7;
+  border-bottom:0;
+  border-radius:58% 58% 0 0;
+  background:linear-gradient(90deg,#7055c7,#6fd3e7 28%,#fcf0ae 50%,#73d4df 72%,#9b70d7) padding-box;
+  box-shadow:0 -1px 0 #4d2c72,0 0 8px #d9beff;
+}
+.legend-card .card-top {
+  z-index:4;
+  display:block;
+  min-height:102px;
+  padding:0 1.1rem .8rem 5.6rem;
+  border-bottom:1px solid #9a668944;
+}
+.legend-card .card-top > div { margin:0; }
+.legend-card .card-top h3 { margin:.25rem 0 0; color:#382044; font-size:1.38rem; text-shadow:0 1px #fff; }
+.legend-card .card-top small { color:#664a75; }
+.legend-card .cost {
+  position:absolute;
+  z-index:8;
+  left:-39px;
+  top:-28px;
+  width:82px;
+  height:82px;
+  border:4px solid #fff9d5;
+  border-radius:50%;
+  font-size:2.35rem;
+  background:radial-gradient(circle at 34% 27%,#efffdb 0 8%,#82d968 20%,#2d914c 54%,#155b32 75%);
+  box-shadow:0 0 0 2px #927337,0 4px 8px #1b3025aa,0 0 11px #abf993;
+}
+.legend-card .effect {
+  z-index:4;
+  min-height:220px;
+  margin:.7rem 0 0;
+  padding:1.1rem 1.05rem;
+  color:#332039;
+  background:linear-gradient(135deg,#fff8de,#fff3b7 56%,#fff9d9);
+  border:2px solid #b68132;
+  border-radius:3px;
+  box-shadow:inset 0 0 0 2px #fffdf0,0 0 0 1px #704c2b;
+}
+.legend-card .stats {
+  z-index:7;
+  left:1.2rem;
+  right:1.2rem;
+  bottom:.35rem;
+  height:86px;
+}
+.legend-card .stats::before {
+  content:"";
+  position:absolute;
+  z-index:-1;
+  left:18%;
+  right:18%;
+  bottom:25px;
+  height:34px;
+  border:2px solid #fffdf3;
+  border-radius:0 0 55% 55%;
+  background:linear-gradient(90deg,#8b68dd,#7ee4e7 27%,#fff0af 50%,#76dcdf 72%,#b983e4);
+  box-shadow:0 1px 0 #7853a0,0 0 7px #d9beff;
+}
+.legend-card .stats strong:first-child,
+.legend-card .stats strong:last-child {
+  bottom:-12px;
+  width:79px;
+  height:79px;
+  font-size:2rem;
+}
+.legend-card .stats strong:first-child { left:-26px; }
+.legend-card .stats strong:last-child { right:-26px; }
+.legend-card::after {
+  z-index:9;
+  right:calc(50% - 15px);
+  bottom:44px;
+  width:30px;
+  height:30px;
+  border:2px solid #fff9ca;
+  border-radius:2px;
+  background:linear-gradient(135deg,#fff4ac,#6ee4e3 45%,#9c73e3 72%,#ffd1e4);
+  box-shadow:0 0 0 2px #7c51a3,0 0 11px #f1d6ff;
+}
+@media (max-width:560px) {
+  .legend-card { min-height:485px; padding:4.5rem 1rem 6.1rem; }
+  .legend-card .card-top { padding-left:4.7rem; }
+  .legend-card .cost { left:-32px; width:72px; height:72px; font-size:2rem; }
+}
+
+/* 読みやすさ優先のレジェンドカード：虹色は縁のアクセントに限定 */
+.legend-card {
+  min-height:475px;
+  padding:4.35rem 1.15rem 5.85rem;
+  border:5px solid #fffdf7;
+  border-radius:17px 17px 12px 12px;
+  color:#38213a;
+  background:linear-gradient(145deg,#effff8 0%,#fffde5 54%,#f9efff 100%) padding-box;
+  box-shadow:0 0 0 2px #6f3f75,0 0 0 4px #fbdbff,0 0 0 6px #6b3659,0 12px 24px #120611a8;
+}
+.legend-card::before {
+  inset:7px;
+  z-index:1;
+  border:2px solid #f0cdff;
+  border-radius:11px 11px 7px 7px;
+  background:none;
+  -webkit-mask:none;
+  mask:none;
+  box-shadow:inset 0 0 0 2px #d2f7f0, inset 0 0 0 4px #fffdf4;
+}
+.legend-card .author-tab {
+  top:27px;
+  left:62px;
+  right:13px;
+  height:auto;
+  min-height:35px;
+  margin:0;
+  padding:.54rem .9rem;
+  color:#fff8e5;
+  background:linear-gradient(90deg,#8d3543,#aa4b57);
+  border:2px solid #fff2d4;
+  border-radius:5px;
+  box-shadow:0 2px 0 #5b2639;
+}
+.legend-card .author-tab::before { display:none; }
+.legend-card .author-tab::after {
+  content:"";
+  position:absolute;
+  z-index:2;
+  left:-12px;
+  right:-7px;
+  top:-14px;
+  height:15px;
+  border:2px solid #fffdf8;
+  border-bottom:0;
+  border-radius:55% 55% 0 0;
+  background:linear-gradient(90deg,#9677dc,#88e3e4 28%,#fff0b2 50%,#7dd9dc 72%,#b683dc);
+  box-shadow:0 -1px 0 #7660a1;
+}
+.legend-card .card-top {
+  min-height:103px;
+  padding:0 .65rem .75rem 4.75rem;
+  border-bottom-color:#a47c9a55;
+}
+.legend-card .card-top h3 { color:#3b2442; font-size:1.35rem; text-shadow:none; }
+.legend-card .card-top small { color:#786079; }
+.legend-card .cost {
+  left:-25px;
+  top:-20px;
+  width:72px;
+  height:72px;
+  border:3px solid #fff8d4;
+  font-size:2rem;
+  box-shadow:0 0 0 2px #8c7138,0 3px 7px #16322199,0 0 8px #a4f58a;
+}
+.legend-card .effect {
+  min-height:190px;
+  margin:.55rem 0 0;
+  padding:1rem;
+  color:#32223a;
+  background:#fffbdc;
+  border:2px solid #b38239;
+  border-radius:3px;
+  box-shadow:inset 0 0 0 2px #fffef5;
+}
+.legend-card .stats { left:1rem; right:1rem; bottom:.35rem; height:76px; }
+.legend-card .stats::before {
+  left:23%;
+  right:23%;
+  bottom:29px;
+  height:23px;
+  border:1px solid #fffdf7;
+  border-radius:0 0 45% 45%;
+  background:linear-gradient(90deg,#9376dc,#83e4e4 32%,#fff0ad 50%,#80dddf 68%,#b888df);
+  box-shadow:0 1px 0 #8062aa;
+}
+.legend-card .stats strong:first-child,
+.legend-card .stats strong:last-child { bottom:-7px; width:70px; height:70px; font-size:1.8rem; }
+.legend-card .stats strong:first-child { left:-14px; }
+.legend-card .stats strong:last-child { right:-14px; }
+.legend-card::after { right:calc(50% - 12px); bottom:47px; width:24px; height:24px; border-width:1px; box-shadow:0 0 0 2px #8362a4,0 0 8px #ebd2ff; }
+@media (max-width:560px) {
+  .legend-card { min-height:455px; padding:4.2rem .9rem 5.7rem; }
+  .legend-card .cost { left:-20px; width:66px; height:66px; font-size:1.8rem; }
+}
+
+/* 装飾を一つのプリズムフレームへ統合する */
+.legend-card {
+  min-height:462px;
+  padding:4rem 1.15rem 5.7rem;
+  border:5px solid #4b2852;
+  border-radius:15px 15px 10px 10px;
+  background:
+    linear-gradient(145deg,#f9fff9 0%,#fffde6 57%,#fcf6ff 100%) padding-box,
+    linear-gradient(135deg,#f5b7d0 0%,#f9ed9d 20%,#9ee6d6 40%,#9cd8f0 58%,#c6abea 78%,#f2b8d1 100%) border-box;
+  box-shadow:0 0 0 2px #fffdf7,0 0 0 4px #9c70ad,0 12px 24px #120611a8;
+}
+.legend-card::before {
+  inset:9px;
+  border:2px solid #fffdf6;
+  border-radius:10px 10px 6px 6px;
+  background:none;
+  box-shadow:inset 0 0 0 1px #90dce0, inset 0 0 0 3px #e6c8ef;
+}
+.legend-card .author-tab {
+  top:22px;
+  left:60px;
+  right:15px;
+  min-height:36px;
+  padding:.56rem .9rem;
+  color:#fff8e7;
+  background:#8a3545;
+  border:2px solid #fff2d4;
+  border-radius:4px;
+  box-shadow:0 2px 0 #542339;
+}
+.legend-card .author-tab::before,
+.legend-card .author-tab::after { display:none; }
+.legend-card .card-top {
+  min-height:100px;
+  padding:0 .55rem .75rem 4.65rem;
+  border-bottom-color:#b89eb955;
+}
+.legend-card .card-top h3 { color:#38233f; font-size:1.33rem; }
+.legend-card .card-top small { color:#756278; }
+.legend-card .cost { left:-22px; top:-15px; width:69px; height:69px; font-size:1.9rem; }
+.legend-card .effect {
+  min-height:183px;
+  margin:.55rem 0 0;
+  color:#34243a;
+  background:#fffce3;
+  border:2px solid #b8863d;
+  box-shadow:inset 0 0 0 2px #fffef4;
+}
+.legend-card .stats { left:1rem; right:1rem; bottom:.45rem; height:72px; }
+.legend-card .stats::before {
+  left:41px;
+  right:41px;
+  bottom:22px;
+  height:27px;
+  border:2px solid #fffdf7;
+  border-radius:3px 3px 11px 11px;
+  background:linear-gradient(90deg,#b085df,#7edce0 30%,#fff0aa 50%,#7edce0 70%,#b085df);
+  box-shadow:0 1px 0 #805c99;
+}
+.legend-card .stats strong:first-child,
+.legend-card .stats strong:last-child { bottom:-6px; width:68px; height:68px; font-size:1.75rem; }
+.legend-card .stats strong:first-child { left:-12px; }
+.legend-card .stats strong:last-child { right:-12px; }
+.legend-card::after {
+  right:calc(50% - 11px);
+  bottom:50px;
+  width:22px;
+  height:22px;
+  border:1px solid #fff8c5;
+  box-shadow:0 0 0 2px #7c5995,0 0 7px #dfc8f3;
+}
+@media (max-width:560px) {
+  .legend-card { min-height:445px; padding:3.9rem .9rem 5.5rem; }
+  .legend-card .cost { left:-18px; width:64px; height:64px; font-size:1.75rem; }
+}
+
+.legend-card .author-tab { font:700 1rem/1.2 "Kaisei Decol",serif; letter-spacing:.02em; }
+.legend-card .card-owner { margin:.38rem 0 0; color:#5d4865; font-size:.78rem; font-weight:700; }
+
+/* 提出カードの情報配置：上はクラス、下部レールは担当者 */
+.legend-card .author-tab { top:20px; left:58px; right:14px; }
+.legend-card .card-top { padding-top:.1rem; }
+.legend-card .card-class { margin:.3rem 0 0; color:#66506e; font-size:.82rem; font-weight:800; letter-spacing:.12em; }
+.legend-card .card-owner { display:block; position:absolute; z-index:2; left:76px; right:76px; bottom:26px; color:#4c3155; font-size:.68rem; font-weight:900; letter-spacing:.08em; text-align:center; white-space:nowrap; }
+.legend-card::after { display:none; }
+
+/* 提出カードの最終配置調整 */
+.legend-card .author-tab { top:40px; }
+.legend-card .cost { top:-35px; }
+.legend-card .card-top { min-height:74px; padding-bottom:.45rem; }
+.legend-card .effect { min-height:210px; margin-top:0; }
+.legend-card .stats .card-owner {
+  display:block;
+  z-index:4;
+  bottom:27px;
+  color:#44284d;
+  text-shadow:0 1px #fffdf5;
+}
+
+/* 提出カードの前後関係と下部レールを調整 */
+.legend-card .cost { z-index:12; }
+.legend-card .author-tab { z-index:7; }
+.legend-card .card-class { position:relative; top:33px; }
+.legend-card .stats::before { left:-14px; right:41px; }
+.legend-card .stats .card-owner { font-size:.82rem; }
+
+/* コストは名前帯より前、レールは攻撃アイコンの内側で止める */
+.legend-card .card-top { z-index:13; }
+.legend-card .stats::before { left:29px; }
+
+/* 提出カードは閲覧専用：ホバーや常時発光で選択可能に見せない */
+.legend-card,
+.legend-card:hover { transform:none; filter:none; animation:none; }
+
+/* 交換フェーズでは原案を手札の横に置き、捨て札の判断材料を常に見せる */
+.exchange-layout {
+  display: grid;
+  grid-template-columns: minmax(270px, 335px) minmax(0, 1fr);
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  align-items: start;
+}
+.exchange-base-pane {
+  position: sticky;
+  top: 1rem;
+}
+.exchange-base-pane > .eyebrow {
+  margin: 0 0 .2rem;
+  color: #8d271f;
+  font-size: .62rem;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+.exchange-base-pane > h3 {
+  margin: 0 0 .7rem;
+  padding-bottom: .55rem;
+  border-bottom: 2px solid #9e633855;
+}
+.exchange-base-pane .base-card {
+  margin: 0;
+  box-shadow: 0 10px 20px #4e1a1133;
+}
+.exchange-workspace { min-width: 0; padding-top: .4rem; }
+.exchange-intro {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 .65rem;
+  padding-right: 5rem;
+}
+.exchange-intro h3 { margin: 0; font: 700 1.45rem "Kaisei Decol", serif; }
+.exchange-intro p { margin: .3rem 0 0; color: #5d4939; font-size: .85rem; line-height: 1.65; }
+.exchange-count {
+  flex: 0 0 auto;
+  padding: .42rem .65rem;
+  color: #6f241d;
+  background: #fff0d0;
+  border: 1px solid #b97a43;
+  font-size: .72rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.exchange-count b { display: inline-block; min-width: 1.15rem; font: 900 1.2rem monospace; text-align: center; }
+.exchange-workspace > .agreement { margin: 0 0 1.2rem; }
+.exchange-hand { grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: .9rem; }
+.exchange-hand .adjust-card { min-height: 205px; }
+.exchange-workspace .center-action { margin: 1.7rem 0 0; }
+
+@media (max-width: 980px) {
+  .exchange-layout { grid-template-columns: 1fr; }
+  .exchange-base-pane { position: static; max-width: 460px; }
+  .exchange-intro { padding-right: 4.5rem; }
+}
+@media (max-width: 560px) {
+  .exchange-sheet { padding-left: 1rem; padding-right: 1rem; }
+  .exchange-intro { display: block; padding-right: 0; }
+  .exchange-count { display: inline-block; margin-top: .7rem; }
+  .exchange-hand { grid-template-columns: 1fr; }
+}
+/* 原案・完成予定・調整札も、提出カードと同じプリズム枠へ統一する */
+.base-card.legend-card .effect {
+  min-height:183px;
+  margin:.55rem 0 0;
+}
+.base-card.legend-card .card-class { position:relative; top:33px; }
+.plan-card.legend-card .plan-note {
+  position:relative;
+  top:35px;
+  display:block;
+  color:#a52b2b;
+  font-size:.64rem;
+  font-weight:900;
+}
+.adjust-card.legend-card {
+  min-height:275px;
+  padding:3.65rem .8rem .85rem;
+  overflow:hidden;
+  border-width:4px;
+  border-radius:12px 12px 8px 8px;
+  box-shadow:0 0 0 2px #fffdf7,0 0 0 4px #9c70ad,0 8px 16px #12061177;
+}
+.adjust-card.legend-card::before { inset:6px; border-radius:8px 8px 5px 5px; }
+.adjust-card.legend-card .author-tab {
+  top:16px;
+  left:35px;
+  right:8px;
+  min-height:28px;
+  padding:.42rem .55rem;
+  font-size:.78rem;
+}
+.adjust-card.legend-card .card-top {
+  min-height:36px;
+  padding:0 .35rem .35rem;
+}
+.adjust-card.legend-card .card-class {
+  top:0;
+  margin:.1rem 0;
+  font-size:.66rem;
+}
+.adjust-card.legend-card .effect {
+  min-height:135px;
+  margin:.35rem 0 0;
+  padding:.75rem;
+  font-size:.75rem;
+  line-height:1.65;
+}
+.basic-chip {
+  background:linear-gradient(135deg,#fafffa 0%,#fffde5 55%,#fcf6ff 100%);
+  border:2px solid #9c70ad;
+  box-shadow:inset 0 0 0 1px #fffdf7,0 2px 0 #785d84;
+}.exchange-card.selected::before {
+  inset:auto;
+  left:auto;
+  bottom:auto;
+}
+.base-card.legend-card .stats strong:first-child {
+  color:#e9f8ff;
+  background:linear-gradient(145deg,#57b9ed,#14569d 69%,#0b326e);
+  border:2px solid #c7efff;
+  clip-path:polygon(50% 0,82% 32%,69% 51%,88% 58%,88% 76%,64% 76%,55% 100%,45% 100%,36% 76%,12% 76%,12% 58%,31% 51%,18% 32%);
+}
+.base-card.legend-card .stats strong:last-child {
+  color:#fff2ed;
+  background:linear-gradient(145deg,#f16c62,#b3262d 68%,#76151f);
+  border:2px solid #ffd3c4;
+  clip-path:polygon(50% 0,92% 15%,84% 67%,50% 100%,16% 67%,8% 15%);
+}
+/* 調整カードは従来の卓上札デザインを維持する */
+.exchange-card.selected::before { right:10px; top:10px; left:auto; bottom:auto; }
+.basic-chip {
+  color:#4a2313;
+  background:#f0ca7d;
+  border-color:#a85e2e;
+  box-shadow:0 3px 0 #a15b2b;
+}
+/* 注記由来の選択肢は、能力本文へ書かず専用操作として扱う */
+.effect-choice-row { margin:.85rem 0; grid-template-columns:repeat(auto-fit,minmax(118px,1fr)); }
+.effect-choice-row .secondary { min-height:40px; padding:.55rem .7rem; font-size:.74rem; }
+.effect-choice-row .secondary.selected {
+  color:#fff8e8;
+  background:#8e302b;
+  border-color:#5d1515;
+  box-shadow:inset 0 0 0 2px #ffd8a6,0 2px 0 #531915;
+}
+/* 調整中の引き直しは、通常札の選択と明確に分ける */
+.redraw-control {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1rem;
+  margin:0 0 1rem;
+  padding:.8rem 1rem;
+  color:#5a2b1f;
+  background:#fff0c9;
+  border-left:5px solid #b04b2d;
+}
+.redraw-control b,.redraw-control small { display:block; }
+.redraw-control small { margin-top:.15rem; color:#805544; font-size:.72rem; }
+.redraw-control.active { color:#fff7df; background:#8c3026; border-left-color:#ffcf78; }
+.redraw-control.active small { color:#ffe6bc; }
+.redraw-choice { outline:4px solid #b84d2d; outline-offset:3px; }
+.redraw-choice::before { content:"引き直す"; position:absolute; z-index:6; right:10px; top:10px; padding:.25rem .45rem; color:#fff7e4; background:#b82720; font-size:.68rem; font-weight:900; }
+/* コスト数字を最優先し、反射・発光をなくす */
+.legend-card .cost {
+  color:#fffdf0;
+  background:#287b43;
+  box-shadow:0 2px 0 #164226;
+  filter:none;
+  text-shadow:0 1px 0 #164226;
+}

@@ -1,0 +1,17 @@
+{
+  "name": "new-pack-meeting",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "cards:build": "node scripts/build-adjustment-cards.mjs",
+    "build": "npm run cards:build && node scripts/build-sites.mjs",
+    "prestart": "npm run cards:build",
+    "start": "node server.mjs",
+    "pretest": "npm run cards:build",
+    "test": "node --test --test-isolation=none"
+  }
+}
