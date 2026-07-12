@@ -100,7 +100,12 @@ function build() {
   const picker = selected?.category === "数値" ? numericPicker(selected) : selected ? effectPlacementPicker(selected) : "";
   const selectableCard = card => {
     const id = card.instanceId || card.id;
-    if (redrawMode) return adjustCard(card).replace(`<article class="adjust-card">`, `<article class="adjust-card adjustment-choice redraw-choice" data-redraw-card="${esc(id)}">`);
+    if (redrawMode) {
+      const opening = applied.has(id)
+        ? `<article class="adjust-card adjustment-choice redraw-choice disabled">`
+        : `<article class="adjust-card adjustment-choice redraw-choice" data-redraw-card="${esc(id)}">`;
+      return adjustCard(card).replace(`<article class="adjust-card">`, opening);
+    }
     const disabled = applied.has(id);
     const opening = disabled ? `<article class="adjust-card adjustment-choice disabled">` : `<article class="adjust-card adjustment-choice" data-action="choose-adjustment" data-adjustment-id="${esc(id)}">`;
     return adjustCard(card).replace(`<article class="adjust-card">`, opening);
@@ -282,6 +287,7 @@ root.addEventListener("click", async event => {
   const card = event.target.closest("[data-redraw-card]");
   if (!card) return;
   try {
+    if (appliedAdjustmentIds().has(card.dataset.redrawCard)) throw new Error("完成予定に適用済みのカードは、取り消してから引き直してください。");
     redrawMode = false;
     await command("exchange", { cardIds: [card.dataset.redrawCard] });
   } catch (error) { notice = error.message; await refresh(); render(); }
