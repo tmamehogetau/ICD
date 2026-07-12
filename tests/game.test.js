@@ -56,7 +56,7 @@ test("管理用JSONは固定IDと必須項目を保つ", () => {
     assert.ok(card.name && card.text);
     assert.ok(categories.has(card.category));
     assert.ok(Number.isInteger(card.copies) && card.copies >= 1);
-    assert.equal(card.text.includes("※"), false);
+    assert.equal(card.text.includes("※"), card.auto === "crest_card_name");
     if (card.choices) assert.ok(Array.isArray(card.choices) && card.choices.length >= 2);
   }
 
@@ -76,10 +76,12 @@ test("数値カードは指定どおり複製され、実体IDで同時使用で
   assert.equal(DRAW_ADJUSTMENTS.filter(card => card.category === "数値").reduce((sum, card) => sum + card.copies, 0), 26);
   assert.ok(DRAW_ADJUSTMENTS.filter(card => card.category === "数値").every(card => ["a13", "a14"].includes(card.id) ? card.copies === 1 : card.copies === 2));
   assert.ok(DRAW_ADJUSTMENTS.filter(card => card.category !== "数値").every(card => card.copies === 1));
-  assert.equal(DRAW_ADJUSTMENT_INSTANCES.length, 137);
+  assert.equal(DRAW_ADJUSTMENT_INSTANCES.length, 138);
   assert.equal(DRAW_ADJUSTMENT_INSTANCES.length, DRAW_ADJUSTMENTS.reduce((sum, card) => sum + card.copies, 0));
   assert.deepEqual(DRAW_ADJUSTMENT_INSTANCES.filter(id => getAdjustmentDefinitionId(id) === "a1"), ["a1#1", "a1#2"]);
   assert.equal(getAdjustment("a1#2").name, "全部盛り");
+  assert.deepEqual(getAdjustment("a126"), { id: "a126", category: "効果", name: "クレスト", text: "自分は『クレスト：※このカードのカード名』を持つ。", auto: "crest_card_name", copies: 1 });
+  assert.equal(BASIC_ADJUSTMENTS.find(card => card.id === "b10")?.text, "自分のターン終了時、");
 
   const game = createGame({ names, rounds: 4, rng });
   const base = BASE_CARDS.find(card => card.id === game.currentBaseId);

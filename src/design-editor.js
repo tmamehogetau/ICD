@@ -9,7 +9,7 @@ export function createDesignEditor(base) {
 
 function makeState(editor) {
   const lines = String(editor.base.effect || "").split(/\r?\n/).map(line => line.trim()).filter(Boolean);
-  return { cost: editor.base.cost, attack: editor.base.attack, health: editor.base.health, blocks: [...(lines.length ? lines : [""]), ...(editor.extraBlocks || [])].map(text => ({ text, prefixes: [], suffixes: [] })) };
+  return { cardName: editor.cardName || editor.base.name, cost: editor.base.cost, attack: editor.base.attack, health: editor.base.health, blocks: [...(lines.length ? lines : [""]), ...(editor.extraBlocks || [])].map(text => ({ text, prefixes: [], suffixes: [] })) };
 }
 
 function access(state, id) {
@@ -45,6 +45,7 @@ function numeric(state, app) {
 
 function applicationText(state, app) {
   if (app.auto === "enhance_cost_plus_2") return app.text.replace("X", String(state.cost + 2));
+  if (app.auto === "crest_card_name") return app.text.replace("※このカードのカード名", state.cardName);
   if (app.params?.choice) return app.text.replace(/【[^】]+】/u, `【${app.params.choice}】`);
   return app.text;
 }

@@ -645,6 +645,12 @@ category: 条件
 name: 攻撃時
 text: 【攻撃時】
 
+id: a126
+category: 効果
+name: クレスト
+text: 自分は『クレスト：※このカードのカード名』を持つ。
+auto: crest_card_name
+
 # ベーシックカード
 #手札には入らず、自由に使う事が出来るカード
 
@@ -693,5 +699,10 @@ id: b9
 category: 条件
 name: ネクロマンス条件
 text: 【ネクロマンス_4】
+
+id: b10
+category: 条件
+name: ターン終了時
+text: 自分のターン終了時、
 
 

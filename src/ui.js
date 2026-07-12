@@ -20,6 +20,10 @@ let voteSelection = { two: null, one: null, active: "two", key: "" };
 
 const esc = value => String(value ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[char]);
 const nl = value => esc(value).replace(/\n/g, "<br>");
+function adjustmentDisplayText(card) {
+  const cardName = draftName || meeting?.base?.name || "このカード";
+  return card.auto === "crest_card_name" ? card.text.replace("※このカードのカード名", cardName) : card.text;
+}
 const mine = () => Boolean(meeting?.private?.isActivePlayer);
 const host = () => Boolean(meeting?.viewer?.isHost);
 
@@ -38,7 +42,7 @@ function baseCard(card, compact = false) {
   return `<article class="base-card legend-card ${compact ? "compact" : ""}" data-class="${esc(card.class)}"><div class="author-tab">${esc(card.name)}</div><div class="card-top"><span class="cost">${card.cost}</span><div><p class="card-class">${esc(card.class)}</p></div></div><div class="stats"><strong>${card.attack}</strong><span>攻撃 / 体力</span><strong>${card.health}</strong></div><p class="effect">${card.effect ? nl(card.effect) : '<span class="blank-effect">能力なし</span>'}</p></article>`;
 }
 function adjustCard(card, controls = "") {
-  return `<article class="adjust-card">${controls}<span class="clip" aria-hidden="true"></span><p class="category">${esc(card.category)}調整</p><h4>${esc(card.name)}</h4><p>${esc(card.text)}</p></article>`;
+  return `<article class="adjust-card">${controls}<span class="clip" aria-hidden="true"></span><p class="category">${esc(card.category)}調整</p><h4>${esc(card.name)}</h4><p>${esc(adjustmentDisplayText(card))}</p></article>`;
 }
 function designCard(card, scores = false, final = false) {
   return `<article class="design-card legend-card"><div class="author-tab">${esc(card.name)}</div><div class="card-top"><span class="cost">${card.cost}</span><div><p class="card-class">${esc(card.class)}</p></div></div><p class="effect">${card.effect ? nl(card.effect) : '<span class="blank-effect">能力なし</span>'}</p><div class="stats"><strong>${card.attack}</strong><span class="card-owner">担当：${esc(card.playerName)}</span><strong>${card.health}</strong></div>${scores ? `<div class="score-strip"><span>ヤバさ ${card.appeal}点</span>${card.overpowered ? "<span>ヤバすぎ：0点</span>" : ""}<strong>${card.score}点</strong></div>` : ""}${final ? `<div class="score-strip"><span>決選魅力票</span><strong>${card.finalAppeal || 0}点</strong></div>` : ""}</article>`;
@@ -85,7 +89,7 @@ function effectPlacementPicker(selected) {
   const instruction = choices.length && !pendingChoice
     ? "先に能力を1つ選んでください。"
     : "完成予定カードの効果ブロックを選択してください。";
-  return `<section class="placement-panel paper"><p class="eyebrow">${esc(selected.category)} PLACEMENT</p><h3>${esc(selected.name)}</h3><p>${esc(selected.text)}</p>${choiceButtons}<b>${instruction}</b><button type="button" class="secondary" data-action="cancel-adjustment">選び直す</button></section>`;
+  return `<section class="placement-panel paper"><p class="eyebrow">${esc(selected.category)} PLACEMENT</p><h3>${esc(selected.name)}</h3><p>${esc(adjustmentDisplayText(selected))}</p>${choiceButtons}<b>${instruction}</b><button type="button" class="secondary" data-action="cancel-adjustment">選び直す</button></section>`;
 }
 function submittedDesign() {
   const design = meeting.private?.submittedDesign;
@@ -96,6 +100,7 @@ function submittedDesign() {
 function build() {
   if (!mine()) return waiting("制作結果を待っています", `完成案を提出済みです。ほかの参加者の提出待ち（${meeting.submission?.designsSubmitted || 0} / ${meeting.submission?.playerCount || 0}）。`);
   ensureEditor();
+  editor.cardName = draftName || meeting.base.name;
   const draft = buildDesignDraft(editor), selected = selectedAdjustment(), applied = appliedAdjustmentIds();
   const hand = meeting.private?.hand || [], basics = meeting.private?.basicAdjustments || BASIC_ADJUSTMENTS;
   const picker = selected?.category === "数値" ? numericPicker(selected) : selected ? effectPlacementPicker(selected) : "";
