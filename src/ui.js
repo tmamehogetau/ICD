@@ -47,7 +47,7 @@ function waiting(title, detail) {
 }
 function setup() {
   if (location.hash) history.replaceState(null, "", location.pathname);
-  root.innerHTML = `${header("今夜の卓を開く", "IZAKAYA / OPEN TABLE")}<section class="setup-sheet paper"><div class="red-note">3〜6名<br>各自の端末で参加</div><div class="online-intro"><b>招待制・アカウント不要</b><span>手札と未公開票は本人だけに届きます。</span></div><form id="create-form"><fieldset><legend>新しい卓を作る</legend><label class="wide">あなたの名前<input name="name" maxlength="16" value="先輩" required></label></fieldset><p class="agreement">今夜は全4ラウンド。最終看板カードのボーナスは3点です。</p><button class="primary stamp-button">卓を作成する</button></form><form id="join-form" class="join-form"><fieldset><legend>卓番号で参加</legend><label>卓番号<input name="code" maxlength="7" required></label><label>あなたの名前<input name="name" maxlength="16" required></label></fieldset><button class="secondary">卓に参加する</button></form></section>`;
+  root.innerHTML = `${header("今夜の卓を開く", "IZAKAYA / OPEN TABLE")}<section class="setup-sheet paper"><div class="red-note">3〜6名<br>各自の端末で参加</div><div class="online-intro"><b>招待制・アカウント不要</b><span>手札と未公開票は本人だけに届きます。</span></div><label class="wide">あなたの名前<input id="player-name" maxlength="16" value="先輩" required></label><form id="create-form"><fieldset><legend>新しい卓を作る</legend></fieldset><p class="agreement">今夜は全4ラウンド。最終看板カードのボーナスは3点です。</p><button class="primary stamp-button">卓を作成する</button></form><form id="join-form" class="join-form"><fieldset><legend>卓番号で参加</legend><label>卓番号<input name="code" maxlength="7" required></label></fieldset><button class="secondary">卓に参加する</button></form></section>`;
 }
 function lobby() {
   root.innerHTML = `${header("飲み仲間を待っています", "IZAKAYA / TABLE WAITING")}<section class="setup-sheet paper"><div class="red-note angled">卓番号<br>${esc(meeting.roomCode)}</div><h3>卓番号を共有</h3><div class="invite-row"><code>${esc(meeting.roomCode)}</code><button class="secondary" data-action="copy">卓番号をコピー</button></div><p class="agreement">参加者はトップ画面の「卓に参加する」から、この卓番号を入力してください。</p><div class="rule-summary"><span>飲み仲間 ${meeting.players.length} / 6名</span><span>乾杯は3名から</span><span>幹事：${esc(meeting.players.find(player => player.id === meeting.hostId)?.name || "")}</span></div><section class="scoreboard paper"><h3>今夜の飲み仲間</h3>${meeting.players.map((item, index) => `<div><span>${String(index + 1).padStart(2, "0")}</span><b>${esc(item.name)}</b><strong>${item.id === meeting.hostId ? "幹事" : "参加済み"}</strong></div>`).join("")}</section>${host() ? `<button class="primary stamp-button" data-action="start" ${meeting.players.length < 3 ? "disabled" : ""}>乾杯して始める</button>` : '<p class="agreement">幹事が乾杯して始めるのを待っています。</p>'}</section>`;
@@ -140,6 +140,11 @@ function syncKeepAlive() {
   keepAliveTimer = window.setInterval(ping, 5 * 60 * 1000);
 }
 function checked(name) { return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(input => input.value); }
+function playerName() {
+  const name = String(document.querySelector("#player-name")?.value || "").trim();
+  if (!name) throw new Error("あなたの名前を入力してください。");
+  return name;
+}
 async function api(path, options = {}) {
   const headers = { ...(options.body ? { "content-type": "application/json" } : {}), ...(session ? { authorization: `Bearer ${session.token}` } : {}) };
   const response = await fetch(path, { ...options, headers }); const body = await response.json().catch(() => ({}));
@@ -165,8 +170,8 @@ root.addEventListener("click", async event => {
 root.addEventListener("submit", async event => {
   event.preventDefault(); const data = new FormData(event.target);
   try {
-    if (event.target.id === "create-form") { const response = await api("/api/rooms", { method: "POST", body: JSON.stringify({ name: data.get("name"), rounds: 4 }) }); saveSession({ roomCode: response.roomCode, token: response.token }); meeting = response.state; render(); return; }
-    if (event.target.id === "join-form") { const code = String(data.get("code")).trim().toUpperCase(); const response = await api(`/api/rooms/${encodeURIComponent(code)}/join`, { method: "POST", body: JSON.stringify({ name: data.get("name") }) }); saveSession({ roomCode: response.roomCode, token: response.token }); meeting = response.state; render(); return; }
+    if (event.target.id === "create-form") { const response = await api("/api/rooms", { method: "POST", body: JSON.stringify({ name: playerName(), rounds: 4 }) }); saveSession({ roomCode: response.roomCode, token: response.token }); meeting = response.state; render(); return; }
+    if (event.target.id === "join-form") { const code = String(data.get("code")).trim().toUpperCase(); const response = await api(`/api/rooms/${encodeURIComponent(code)}/join`, { method: "POST", body: JSON.stringify({ name: playerName() }) }); saveSession({ roomCode: response.roomCode, token: response.token }); meeting = response.state; render(); return; }
     if (event.target.id === "design-form") { if (isSubmittingDesign) return; const draft = buildDesignDraft(editor); isSubmittingDesign = true; render(); try { await command("submitDesign", { name: draftName.trim() || meeting.base.name, cost: draft.cost, attack: draft.attack, health: draft.health, effect: draft.effect, intent: "", adjustmentIds: editor.applications.map(item => item.adjustmentId) }); } finally { isSubmittingDesign = false; } }
     if (event.target.id === "vote-form") await command("submitRoundVote", { two: data.get("two") || null, one: data.get("one") || null });
     if (event.target.id === "final-vote-form") await command("submitFinalVote", { two: data.get("two") || null, one: data.get("one") || null });
