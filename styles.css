@@ -1139,3 +1139,22 @@ input, textarea, select { color:#442116; background:#fff1cf; border:1px solid #a
   .block-editor .hand-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:1.15rem; }
   .evaluation-workspace { grid-template-columns:minmax(0,1fr) 25rem; gap:1.75rem; }
 }
+/* 投票先は左の提出カードを直接選ぶ */
+.vote-selection-instruction { margin:.35rem 0 .8rem; font-size:.78rem; line-height:1.5; }
+.vote-selection-instruction b, .vote-selection-instruction span { display:block; }
+.vote-selection-instruction b { color:#8b2c22; }
+.vote-selection-instruction span { color:#6d5144; font-size:.71rem; }
+.vote-slot-list { display:grid; gap:.6rem; }
+.vote-slot { display:grid; grid-template-columns:48px minmax(0,1fr); align-items:center; gap:.7rem; width:100%; padding:.7rem; color:#482317; background:#fff0cc; border:1px solid #b77a44; text-align:left; box-shadow:inset 0 0 0 2px #fff8e6; }
+.vote-slot b, .vote-slot small { display:block; }
+.vote-slot small { margin-top:.15rem; color:#725849; font-size:.71rem; }
+.vote-slot.active { border-color:#9a2b22; box-shadow:inset 0 0 0 2px #ffd66f,0 0 0 2px #9a2b22; }
+.vote-slot.active .vote-value { filter:brightness(1.15); }
+.legend-card.vote-card-choice { cursor:pointer; transition:transform .16s ease, box-shadow .16s ease, filter .16s ease; }
+.legend-card.vote-card-choice:hover { transform:translateY(-5px); filter:brightness(1.04) saturate(1.08); }
+.legend-card.vote-card-choice.selected-two { box-shadow:0 0 0 3px #b93225,0 0 0 7px #ffe097,0 14px 28px #160721aa; }
+.legend-card.vote-card-choice.selected-one { box-shadow:0 0 0 3px #155f92,0 0 0 7px #b7e5ff,0 14px 28px #160721aa; }
+.legend-card.vote-card-own { opacity:.64; filter:saturate(.72); }
+@media (max-width:560px) {
+  .vote-slot { grid-template-columns:42px minmax(0,1fr); padding:.6rem; }
+}

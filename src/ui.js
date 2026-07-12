@@ -16,6 +16,7 @@ let draftIntent = "";
 let redrawMode = false;
 let keepAliveTimer = null;
 let isSubmittingDesign = false;
+let voteSelection = { two: null, one: null, active: "two", key: "" };
 
 const esc = value => String(value ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[char]);
 const nl = value => esc(value).replace(/\n/g, "<br>");
@@ -113,7 +114,25 @@ function build() {
   root.innerHTML = `${header("調整フェーズ", "PRIVATE / BLOCK EDITOR")}<div class="build-layout block-editor"><section class="workspace"><div class="editor-board"><section class="adjustment-bank"><div class="subhead"><h3>通常の調整カード</h3><span>手札内のカードをすべて使用可</span></div><section class="redraw-control paper ${redrawMode ? "active" : ""}"><div><b>${redrawMode ? "不要札を1枚クリック" : "不要札を引き直す"}</b><small>残り ${Math.max(0, 2 - (meeting.private?.redrawsUsed || 0))} / 2回</small></div>${redrawMode ? '<button type="button" class="secondary" data-action="cancel-redraw">戻る</button>' : meeting.private?.canRedraw ? '<button type="button" class="secondary" data-action="begin-redraw">引き直しモード</button>' : ""}</section><div class="hand-grid">${hand.map(selectableCard).join("")}</div><div class="subhead"><h3>ベーシックカード</h3><span>手札外・枚数制限なし</span></div><div class="hand-grid basic-grid">${basics.map(card => `<button type="button" class="basic-chip" data-action="choose-adjustment" data-adjustment-id="${esc(card.id)}" ${applied.has(card.id) ? "disabled" : ""}><small>${esc(card.category)}</small><b>${esc(card.name)}</b><span>${esc(card.text)}</span></button>`).join("")}</div></section><section class="plan-workspace"><div class="subhead"><h3>完成予定</h3><span>適用先を選ぶと即時反映</span></div>${planCard(draft, selected)}${picker}<section class="application-log paper"><h3>適用履歴</h3>${editor.applications.length ? editor.applications.map((app, index) => `<div><span>${esc(app.kind)} / ${esc(adjustmentPool().find(card => (card.instanceId || card.id) === app.adjustmentId)?.name || app.definitionId)}</span><button type="button" data-action="remove-application" data-application-index="${index}">取り消す</button></div>`).join("") : "<p>まだ調整カードを置いていません。</p>"}</section><form id="design-form" class="center-action" aria-busy="${isSubmittingDesign}"><button class="primary stamp-button ${isSubmittingDesign ? "submitting" : ""}" ${isSubmittingDesign ? "disabled" : ""}>${isSubmittingDesign ? "完成予定を提出中…" : "この完成予定を提出"}</button>${isSubmittingDesign ? '<p class="submission-feedback" role="status">提出を受け付けています…</p>' : ""}</form></section></div></section></div>`;
 }
 function presentations() { root.innerHTML = `${header("今夜の品評会", "AGENDA 04 / PRESENTATION")}<div class="notice paper"><b>全員の完成カードを公開中</b><span>性能と調整内容を確認してから、みんなの品評を始めます。</span></div><div class="design-grid">${meeting.designs.map(card => designCard(card)).join("")}</div><div class="center-action">${host() ? '<button class="primary stamp-button" data-action="begin-voting">この一覧のまま評価へ</button>' : '<p class="agreement">幹事がみんなの品評を開始するのを待っています。</p>'}</div>`; }
-function options(cards) { return `<option value="">投票しない</option>${cards.filter(card => card.playerId !== meeting.viewer.id).map(card => `<option value="${esc(card.id)}">${esc(card.name)}（${esc(card.playerName)}）</option>`).join("")}`; }
+function voteSelectionForCurrentPhase() {
+  const key = `${meeting.stage}:${meeting.round}:${meeting.viewer.id}`;
+  if (voteSelection.key !== key) voteSelection = { two: null, one: null, active: "two", key };
+  return voteSelection;
+}
+function selectableVoteCard(card, selection) {
+  const own = card.playerId === meeting.viewer.id;
+  const selected = selection.two === card.id ? "selected-two" : selection.one === card.id ? "selected-one" : "";
+  const opening = own
+    ? '<article class="design-card legend-card vote-card-own">'
+    : `<article class="design-card legend-card vote-card-choice ${selected}" data-vote-card="${esc(card.id)}" role="button" tabindex="0" aria-pressed="${Boolean(selected)}">`;
+  return designCard(card).replace('<article class="design-card legend-card">', opening);
+}
+function voteSlot(slot, label, cards, selection) {
+  const selectedCard = cards.find(card => card.id === selection[slot]);
+  const value = slot === "two" ? "2" : "1";
+  const hint = selectedCard ? `投票先：${esc(selectedCard.playerName)}` : "左の提出カードを選択";
+  return `<button type="button" class="vote-slot ${selection.active === slot ? "active" : ""}" data-vote-slot="${slot}" aria-pressed="${selection.active === slot}"><span class="vote-value ${slot}">${value}</span><span><b>${label}</b><small>${hint}</small></span></button>`;
+}
 function vote(final = false) {
   if (!mine()) return waiting(final ? "決選投票中" : "ヤバいカード投票中", `あなたの投票は提出済みです。ほかの参加者の投票待ち（${final ? meeting.submission?.finalVotesSubmitted || 0 : meeting.submission?.votesSubmitted || 0} / ${meeting.submission?.playerCount || 0}）。`);
   const cards = final ? meeting.bestCards : meeting.designs;
@@ -121,7 +140,9 @@ function vote(final = false) {
   const note = final ? "最強だと思うカードを選んでください。" : "一番ヤバいカードと、次にヤバいカードへ投票します。";
   const twoLabel = final ? "一番推したいカード" : "一番ヤバいカード";
   const oneLabel = final ? "次に推したいカード" : "次にヤバいカード";
-  root.innerHTML = `${header(title, final ? "FINAL / OPEN BALLOT" : "AGENDA 05 / YABAI BALLOT")}<section class="evaluation-workspace"><div class="evaluation-cards"><div class="notice paper"><b>${final ? "カードを見ながら決選投票" : "カードを見ながらヤバさを投票"}</b><span>${esc(note)}</span></div><div class="design-grid">${cards.map(card => designCard(card)).join("")}</div></div><form id="${final ? "final-vote-form" : "vote-form"}" class="ballot paper evaluation-ballot"><div class="ballot-mark">${final ? "決選投票" : "ヤバい投票"}</div><label><span class="vote-value two">2</span><span><b>2点票</b><small>${esc(twoLabel)}</small></span><select name="two">${options(cards)}</select></label><label><span class="vote-value one">1</span><span><b>1点票</b><small>${esc(oneLabel)}</small></span><select name="one">${options(cards)}</select></label>${final ? "" : '<p class="agreement">自分の案には投票できません。自分以外の全員から2点票を受けたカードは「ヤバすぎ」として0点になります。</p>'}<button class="primary stamp-button">${final ? "決選票を提出する" : "ヤバい票を提出する"}</button></form></section>`;
+  const selection = voteSelectionForCurrentPhase();
+  const activeLabel = selection.active === "two" ? "2点票の投票先を選択中" : "1点票の投票先を選択中";
+  root.innerHTML = `${header(title, final ? "FINAL / OPEN BALLOT" : "AGENDA 05 / YABAI BALLOT")}<section class="evaluation-workspace"><div class="evaluation-cards"><div class="notice paper"><b>${final ? "カードを見ながら決選投票" : "カードを見ながらヤバさを投票"}</b><span>${esc(note)}</span></div><div class="design-grid">${cards.map(card => selectableVoteCard(card, selection)).join("")}</div></div><form id="${final ? "final-vote-form" : "vote-form"}" class="ballot paper evaluation-ballot"><div class="ballot-mark">${final ? "決選投票" : "ヤバい投票"}</div><p class="vote-selection-instruction"><b>${activeLabel}</b><span>右の票を選んでから、左の提出カードをクリックしてください。</span></p><div class="vote-slot-list">${voteSlot("two", twoLabel, cards, selection)}${voteSlot("one", oneLabel, cards, selection)}</div>${final ? "" : '<p class="agreement">自分の案には投票できません。自分以外の全員から2点票を受けたカードは「ヤバすぎ」として0点になります。</p>'}<button class="primary stamp-button" ${selection.two ? "" : "disabled"}>${final ? "決選票を提出する" : "ヤバい票を提出する"}</button></form></section>`;
 }
 function results() { root.innerHTML = `${header(`第${meeting.round}回　今夜の採点結果`, "AGENDA 06 / JUDGEMENT")}<div class="formula paper"><span>ヤバさ＝2点票・1点票の合計</span><span>自分以外の全員から2点票＝ヤバすぎ・0点</span></div><div class="design-grid results">${meeting.designs.map(card => designCard(card, true)).join("")}</div><section class="scoreboard paper"><h3>累計得点</h3>${[...meeting.players].sort((a, b) => b.total - a.total).map((item, index) => `<div><span>${index + 1}</span><b>${esc(item.name)}</b><strong>${item.total}点</strong></div>`).join("")}</section><div class="center-action">${host() ? `<button class="primary" data-action="continue-round">${meeting.round === meeting.rounds ? "今夜の看板カード決選へ" : "次の原案を開く"}</button>` : '<p class="agreement">幹事が次へ進めるのを待っています。</p>'}</div>`; }
 function finalOverview() { root.innerHTML = `${header("今夜の看板カード決選", "FINAL AGENDA / SHORTLIST")}<div class="notice paper"><b>再プレゼンは15秒</b><span>ラウンド最優カードを並べ、最後は純粋な魅力で選びます。</span></div><div class="design-grid finalists">${meeting.bestCards.map(card => designCard(card, true)).join("")}</div><div class="center-action">${host() ? '<button class="primary stamp-button" data-action="begin-final-voting">決選投票へ</button>' : '<p class="agreement">幹事が決選投票を開始するのを待っています。</p>'}</div>`; }
@@ -163,6 +184,18 @@ async function refresh() {
 }
 async function command(type, payload = {}) { const response = await api(`/api/rooms/${encodeURIComponent(session.roomCode)}/actions`, { method: "POST", body: JSON.stringify({ type, payload, version: meeting.version, actionId: crypto.randomUUID() }) }); meeting = response.state; render(); }
 root.addEventListener("click", async event => {
+  const voteSlotButton = event.target.closest("[data-vote-slot]");
+  const voteCard = event.target.closest("[data-vote-card]");
+  if (voteSlotButton) { voteSelection.active = voteSlotButton.dataset.voteSlot; render(); return; }
+  if (voteCard) {
+    const slot = voteSelection.active;
+    const otherSlot = slot === "two" ? "one" : "two";
+    if (voteSelection[otherSlot] === voteCard.dataset.voteCard) { notice = "2点票と1点票は別の提出カードを選んでください。"; render(); return; }
+    voteSelection[slot] = voteSelection[slot] === voteCard.dataset.voteCard ? null : voteCard.dataset.voteCard;
+    if (slot === "two" && voteSelection.two && !voteSelection.one) voteSelection.active = "one";
+    render();
+    return;
+  }
   const button = event.target.closest("[data-action]"); if (!button) return;
   try { const action = button.dataset.action;
     if (action === "copy") { await navigator.clipboard.writeText(meeting.roomCode); notice = "卓番号をコピーしました。"; render(); return; }
@@ -178,8 +211,8 @@ root.addEventListener("submit", async event => {
     if (event.target.id === "create-form") { const response = await api("/api/rooms", { method: "POST", body: JSON.stringify({ name: playerName(), rounds: 4 }) }); saveSession({ roomCode: response.roomCode, token: response.token }); meeting = response.state; render(); return; }
     if (event.target.id === "join-form") { const code = String(data.get("code")).trim().toUpperCase(); const response = await api(`/api/rooms/${encodeURIComponent(code)}/join`, { method: "POST", body: JSON.stringify({ name: playerName() }) }); saveSession({ roomCode: response.roomCode, token: response.token }); meeting = response.state; render(); return; }
     if (event.target.id === "design-form") { if (isSubmittingDesign) return; const draft = buildDesignDraft(editor); isSubmittingDesign = true; render(); try { await command("submitDesign", { name: draftName.trim() || meeting.base.name, cost: draft.cost, attack: draft.attack, health: draft.health, effect: draft.effect, intent: "", adjustmentIds: editor.applications.map(item => item.adjustmentId) }); } finally { isSubmittingDesign = false; } }
-    if (event.target.id === "vote-form") await command("submitRoundVote", { two: data.get("two") || null, one: data.get("one") || null });
-    if (event.target.id === "final-vote-form") await command("submitFinalVote", { two: data.get("two") || null, one: data.get("one") || null });
+    if (event.target.id === "vote-form") await command("submitRoundVote", { two: voteSelection.two, one: voteSelection.one });
+    if (event.target.id === "final-vote-form") await command("submitFinalVote", { two: voteSelection.two, one: voteSelection.one });
   } catch (error) { notice = error.message; await refresh(); render(); }
 });
 document.addEventListener("keydown", async event => { if (event.key.toLowerCase() !== "f" || ["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName)) return; if (document.fullscreenElement) await document.exitFullscreen(); else await document.documentElement.requestFullscreen(); });
