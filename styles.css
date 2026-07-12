@@ -1106,3 +1106,36 @@ input, textarea, select { color:#442116; background:#fff1cf; border:1px solid #a
   text-shadow:0 1px 0 #164226;
 }
 .submission-feedback{margin:0;color:#7f1d1d;font-size:.78rem;font-weight:800;letter-spacing:.06em}.stamp-button.submitting{transform:rotate(-1deg) scale(.98);box-shadow:0 0 0 3px #d98a40,0 0 18px #e8bd6c}
+
+/* PC横長画面：卓の入口と各フェーズを、横の余白まで使って見渡せる構成にする */
+@media (min-width: 961px) {
+  body { padding:0 clamp(1.5rem,3vw,4.5rem); }
+  .masthead { max-width:1480px; padding:1.65rem 0 1.15rem; }
+  .masthead > * { position:relative; z-index:1; }
+  .masthead::before, .masthead::after { z-index:0; }
+  .masthead h1 { font-size:clamp(2.9rem,4.2vw,4.8rem); }
+  .meeting-badge { width:100px; }
+  main { max-width:1480px; min-height:0; margin:1.45rem auto 3.5rem; }
+  .section-head { margin-bottom:1.1rem; padding:.8rem 1.2rem .9rem; }
+  .section-head h2 { font-size:clamp(2rem,3.2vw,3.1rem); }
+
+  .setup-sheet { max-width:1120px; padding:2.1rem 2.5rem 2.35rem; }
+  .setup-sheet .online-intro { display:flex; align-items:baseline; gap:.8rem; margin:0 12rem 1.1rem 0; }
+  .player-name-field { display:block; max-width:460px; margin:0 0 1.35rem; font-weight:800; }
+  .player-name-field input { margin-top:.35rem; }
+  .table-entry { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:1.2rem; align-items:stretch; }
+  .table-entry form { margin:0; padding:1.2rem 1.3rem 1.3rem; border:1px solid #b87a48; background:#fff1cd80; box-shadow:inset 0 0 0 2px #fff7df; }
+  .table-entry fieldset { display:flex; flex-direction:column; height:100%; margin:0; }
+  .table-entry legend { margin-bottom:.75rem; }
+  .table-entry .agreement { flex:1; min-height:4.1rem; margin:0 0 1rem; }
+  .table-entry label { display:block; margin-bottom:1rem; font-weight:800; }
+  .table-entry label input { margin-top:.35rem; }
+  .table-entry button { width:100%; margin-top:auto; }
+
+  .two-column { grid-template-columns:minmax(390px,.85fr) minmax(480px,1.15fr); gap:clamp(2rem,4vw,4.5rem); }
+  .two-column .base-card { max-width:520px; margin-inline:auto; }
+  .design-grid { grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:1.75rem; }
+  .editor-board { grid-template-columns:minmax(600px,1.15fr) minmax(420px,.85fr); gap:2rem; }
+  .block-editor .hand-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:1.15rem; }
+  .evaluation-workspace { grid-template-columns:minmax(0,1fr) 25rem; gap:1.75rem; }
+}
