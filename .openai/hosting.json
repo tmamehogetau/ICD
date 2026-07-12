@@ -1,7 +1,5 @@
 {
-  "d1": {
-    "DB": {}
-  },
+  "d1": "DB",
   "r2": null,
   "project_id": "appgprj_6a5360fc83c081919a56aa750a509f76"
 }
