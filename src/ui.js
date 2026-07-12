@@ -29,7 +29,6 @@ function saveSession(value) {
   session = value;
   if (value) sessionStorage.setItem(storageKey, JSON.stringify(value)); else sessionStorage.removeItem(storageKey);
 }
-function joinCode() { return new URLSearchParams(location.hash.slice(1)).get("join")?.toUpperCase() || ""; }
 function header(title, kicker = "ONLINE MEETING") {
   return `<div class="section-head"><div><p class="eyebrow">${kicker}</p><h2>${esc(title)}</h2></div>${meeting && meeting.stage !== "lobby" ? `<div class="round-chip"><span>ROUND</span><strong>${meeting.round}</strong><small>/ ${meeting.rounds}</small></div>` : ""}</div>`;
 }
@@ -47,12 +46,11 @@ function waiting(title, detail) {
   return `<section class="pass-screen"><p class="eyebrow">IZAKAYA / WAITING</p><div class="pass-folder"><span>いま調整中</span><strong>${esc(meeting.activePlayerName || "幹事")}</strong><small>${esc(detail)}</small></div><h2>${esc(title)}</h2><p>この画面は自動で更新されます。</p></section>`;
 }
 function setup() {
-  const code = joinCode();
-  root.innerHTML = `${header(code ? "卓へ参加する" : "今夜の卓を開く", "IZAKAYA / OPEN TABLE")}<section class="setup-sheet paper"><div class="red-note">3〜6名<br>各自の端末で参加</div><div class="online-intro"><b>招待制・アカウント不要</b><span>手札と未公開票は本人だけに届きます。</span></div>${code ? "" : `<form id="create-form"><fieldset><legend>新しい卓を作る</legend><label class="wide">あなたの名前<input name="name" maxlength="16" value="先輩" required></label></fieldset><p class="agreement">今夜は全4ラウンド。最終看板カードのボーナスは3点です。</p><button class="primary stamp-button">卓を作成する</button></form>`}<form id="join-form" class="${code ? "" : "join-form"}"><fieldset><legend>招待された卓へ参加</legend><label>卓番号<input name="code" value="${esc(code)}" maxlength="7" required></label><label>あなたの名前<input name="name" maxlength="16" required></label></fieldset><button class="secondary">卓に参加する</button></form></section>`;
+  if (location.hash) history.replaceState(null, "", location.pathname);
+  root.innerHTML = `${header("今夜の卓を開く", "IZAKAYA / OPEN TABLE")}<section class="setup-sheet paper"><div class="red-note">3〜6名<br>各自の端末で参加</div><div class="online-intro"><b>招待制・アカウント不要</b><span>手札と未公開票は本人だけに届きます。</span></div><form id="create-form"><fieldset><legend>新しい卓を作る</legend><label class="wide">あなたの名前<input name="name" maxlength="16" value="先輩" required></label></fieldset><p class="agreement">今夜は全4ラウンド。最終看板カードのボーナスは3点です。</p><button class="primary stamp-button">卓を作成する</button></form><form id="join-form" class="join-form"><fieldset><legend>卓番号で参加</legend><label>卓番号<input name="code" maxlength="7" required></label><label>あなたの名前<input name="name" maxlength="16" required></label></fieldset><button class="secondary">卓に参加する</button></form></section>`;
 }
 function lobby() {
-  const link = `${location.origin}${location.pathname}#join=${meeting.roomCode}`;
-  root.innerHTML = `${header("飲み仲間を待っています", "IZAKAYA / TABLE WAITING")}<section class="setup-sheet paper"><div class="red-note angled">卓番号<br>${esc(meeting.roomCode)}</div><h3>招待リンク</h3><div class="invite-row"><code>${esc(link)}</code><button class="secondary" data-action="copy">コピー</button></div><div class="rule-summary"><span>飲み仲間 ${meeting.players.length} / 6名</span><span>乾杯は3名から</span><span>幹事：${esc(meeting.players.find(player => player.id === meeting.hostId)?.name || "")}</span></div><section class="scoreboard paper"><h3>今夜の飲み仲間</h3>${meeting.players.map((item, index) => `<div><span>${String(index + 1).padStart(2, "0")}</span><b>${esc(item.name)}</b><strong>${item.id === meeting.hostId ? "幹事" : "参加済み"}</strong></div>`).join("")}</section>${host() ? `<button class="primary stamp-button" data-action="start" ${meeting.players.length < 3 ? "disabled" : ""}>乾杯して始める</button>` : '<p class="agreement">幹事が乾杯して始めるのを待っています。</p>'}</section>`;
+  root.innerHTML = `${header("飲み仲間を待っています", "IZAKAYA / TABLE WAITING")}<section class="setup-sheet paper"><div class="red-note angled">卓番号<br>${esc(meeting.roomCode)}</div><h3>卓番号を共有</h3><div class="invite-row"><code>${esc(meeting.roomCode)}</code><button class="secondary" data-action="copy">卓番号をコピー</button></div><p class="agreement">参加者はトップ画面の「卓に参加する」から、この卓番号を入力してください。</p><div class="rule-summary"><span>飲み仲間 ${meeting.players.length} / 6名</span><span>乾杯は3名から</span><span>幹事：${esc(meeting.players.find(player => player.id === meeting.hostId)?.name || "")}</span></div><section class="scoreboard paper"><h3>今夜の飲み仲間</h3>${meeting.players.map((item, index) => `<div><span>${String(index + 1).padStart(2, "0")}</span><b>${esc(item.name)}</b><strong>${item.id === meeting.hostId ? "幹事" : "参加済み"}</strong></div>`).join("")}</section>${host() ? `<button class="primary stamp-button" data-action="start" ${meeting.players.length < 3 ? "disabled" : ""}>乾杯して始める</button>` : '<p class="agreement">幹事が乾杯して始めるのを待っています。</p>'}</section>`;
 }
 function reveal() {
   root.innerHTML = `${header(`第${meeting.round}回　今夜のお題`, "KANPAI 01 / BASE CARD")}<div class="two-column"><section>${baseCard(meeting.base)}</section><section class="brief paper"><div class="red-note angled">今夜のたたき台</div><h3>今夜の調整ルール</h3><ol><li>原案を確認する</li><li>調整中に不要な通常調整カードを1枚ずつ、最大2回引き直す</li><li>通常調整・ベーシックを自由に適用する</li><li>完成案を手入力して提出する</li></ol><p class="agreement">各端末から、同時に操作します。秘密情報は本人以外に表示されません。</p>${host() ? '<button class="primary" data-action="begin-build">調整を始める</button>' : '<p class="agreement">幹事が調整を始めるのを待っています。</p>'}</section></div>`;
@@ -157,8 +155,8 @@ async function command(type, payload = {}) { const response = await api(`/api/ro
 root.addEventListener("click", async event => {
   const button = event.target.closest("[data-action]"); if (!button) return;
   try { const action = button.dataset.action;
-    if (action === "copy") { await navigator.clipboard.writeText(`${location.origin}${location.pathname}#join=${meeting.roomCode}`); notice = "招待リンクをコピーしました。"; render(); return; }
-    if (action === "leave") { saveSession(null); meeting = null; location.hash = ""; render(); return; }
+    if (action === "copy") { await navigator.clipboard.writeText(meeting.roomCode); notice = "卓番号をコピーしました。"; render(); return; }
+    if (action === "leave") { saveSession(null); meeting = null; render(); return; }
     if (action === "begin-redraw") { redrawMode = true; selectedAdjustmentId = null; render(); return; }
     if (action === "cancel-redraw") { redrawMode = false; render(); return; }
     const map = { start: "start", "begin-build": "beginBuild", "reveal-build": "revealBuildHand", "cancel-design": "cancelDesign", "begin-voting": "beginVoting", "reveal-vote": "revealRoundBallot", "continue-round": "continueRound", "begin-final-voting": "beginFinalVoting", "reveal-final-vote": "revealFinalBallot" }; if (map[action]) await command(map[action]);
@@ -167,8 +165,8 @@ root.addEventListener("click", async event => {
 root.addEventListener("submit", async event => {
   event.preventDefault(); const data = new FormData(event.target);
   try {
-    if (event.target.id === "create-form") { const response = await api("/api/rooms", { method: "POST", body: JSON.stringify({ name: data.get("name"), rounds: 4 }) }); saveSession({ roomCode: response.roomCode, token: response.token }); meeting = response.state; location.hash = `join=${meeting.roomCode}`; render(); return; }
-    if (event.target.id === "join-form") { const code = String(data.get("code")).trim().toUpperCase(); const response = await api(`/api/rooms/${encodeURIComponent(code)}/join`, { method: "POST", body: JSON.stringify({ name: data.get("name") }) }); saveSession({ roomCode: response.roomCode, token: response.token }); meeting = response.state; location.hash = `join=${meeting.roomCode}`; render(); return; }
+    if (event.target.id === "create-form") { const response = await api("/api/rooms", { method: "POST", body: JSON.stringify({ name: data.get("name"), rounds: 4 }) }); saveSession({ roomCode: response.roomCode, token: response.token }); meeting = response.state; render(); return; }
+    if (event.target.id === "join-form") { const code = String(data.get("code")).trim().toUpperCase(); const response = await api(`/api/rooms/${encodeURIComponent(code)}/join`, { method: "POST", body: JSON.stringify({ name: data.get("name") }) }); saveSession({ roomCode: response.roomCode, token: response.token }); meeting = response.state; render(); return; }
     if (event.target.id === "design-form") { if (isSubmittingDesign) return; const draft = buildDesignDraft(editor); isSubmittingDesign = true; render(); try { await command("submitDesign", { name: draftName.trim() || meeting.base.name, cost: draft.cost, attack: draft.attack, health: draft.health, effect: draft.effect, intent: "", adjustmentIds: editor.applications.map(item => item.adjustmentId) }); } finally { isSubmittingDesign = false; } }
     if (event.target.id === "vote-form") await command("submitRoundVote", { two: data.get("two") || null, one: data.get("one") || null });
     if (event.target.id === "final-vote-form") await command("submitFinalVote", { two: data.get("two") || null, one: data.get("one") || null });
