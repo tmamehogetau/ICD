@@ -5,7 +5,7 @@ const sourceUrl = new URL("../data/adjustment-cards.txt", import.meta.url);
 const outputUrl = new URL("../data/adjustment-cards.json", import.meta.url);
 const temporaryOutputUrl = new URL("../data/adjustment-cards.json.tmp", import.meta.url);
 const requiredKeys = ["id", "category", "name", "text"];
-const optionalKeys = ["copies", "choices", "auto"];
+const optionalKeys = ["copies", "choices", "auto", "creates"];
 const cardKeys = [...requiredKeys, ...optionalKeys];
 const allowedCategories = new Set(["数値", "効果", "条件"]);
 
@@ -35,6 +35,7 @@ function parseCards(source) {
       ...Object.fromEntries(requiredKeys.map(key => [key, currentCard[key]])),
       ...(choices ? { choices } : {}),
       ...(currentCard.auto ? { auto: currentCard.auto } : {}),
+      ...(currentCard.creates ? { creates: currentCard.creates } : {}),
       copies: Number(copies)
     });
     currentCard = {};

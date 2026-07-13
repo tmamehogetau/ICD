@@ -650,6 +650,7 @@ category: 効果
 name: クレスト
 text: 自分は『クレスト：※このカードのカード名』を持つ。
 auto: crest_card_name
+creates: crest_effect
 
 # ベーシックカード
 #手札には入らず、自由に使う事が出来るカード

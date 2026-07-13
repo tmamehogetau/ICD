@@ -9,7 +9,7 @@ export function createDesignEditor(base) {
 
 function makeState(editor) {
   const lines = String(editor.base.effect || "").split(/\r?\n/).map(line => line.trim()).filter(Boolean);
-  return { cardName: editor.cardName || editor.base.name, cost: editor.base.cost, attack: editor.base.attack, health: editor.base.health, blocks: [...(lines.length ? lines : [""]), ...(editor.extraBlocks || [])].map(text => ({ text, prefixes: [], suffixes: [] })) };
+  return { cardName: editor.cardName || editor.base.name, cost: editor.base.cost, attack: editor.base.attack, health: editor.base.health, blocks: [...(lines.length ? lines : [""]), ...(editor.extraBlocks || [])].map(text => ({ text, prefixes: [], suffixes: [] })), crest: { enabled: false, prefixes: [], suffixes: [] } };
 }
 
 function access(state, id) {
@@ -56,11 +56,15 @@ export function buildDesignDraft(editor) {
   for (const app of editor.applications) {
     if (app.kind === "numeric") continue;
     const text = applicationText(state, app);
-    if (app.kind === "condition") state.blocks[app.blockIndex].prefixes.push(text);
-    else if (app.kind === "effect") state.blocks[app.blockIndex].suffixes.push(text);
+    if (app.creates === "crest_effect") state.crest.enabled = true;
+    const target = app.destination === "crest_effect" ? state.crest : state.blocks[app.blockIndex];
+    if (app.destination === "crest_effect") assert(state.crest.enabled, "クレスト効果欄を先に追加してください。");
+    if (app.kind === "condition") target.prefixes.push(text);
+    else if (app.kind === "effect") target.suffixes.push(text);
   }
   const blocks = state.blocks.map((block, index) => ({ id: `block-${index}`, rendered: [...block.prefixes, block.text, ...block.suffixes].filter(Boolean).join(" "), ...block }));
-  return { cost: state.cost, attack: state.attack, health: state.health, blocks, effect: blocks.map(block => block.rendered).filter(Boolean).join("\n") };
+  const crest = state.crest.enabled ? { id: "crest-effect", rendered: [...state.crest.prefixes, ...state.crest.suffixes].filter(Boolean).join(" "), ...state.crest } : null;
+  return { cost: state.cost, attack: state.attack, health: state.health, blocks, ...(crest ? { crest } : {}), effect: [...blocks.map(block => block.rendered).filter(Boolean), crest ? `クレスト効果${crest.rendered ? ` ${crest.rendered}` : ""}` : ""].filter(Boolean).join("\n") };
 }
 export function getEffectBlocks(editor) { return buildDesignDraft(editor).blocks; }
 export const numericCardNeedsTarget = definitionId => baseId(definitionId) !== "a6";
@@ -75,16 +79,16 @@ export function getNumericTargets(editor, definitionId) {
   if (id === "a14") return targets.filter(target => target.kind === "block");
   return targets;
 }
-function add(editor, kind, card, blockIndex, targetIds = [], params = {}) {
-  if (kind !== "numeric") assert(Number.isInteger(blockIndex) && blockIndex >= 0 && blockIndex < getEffectBlocks(editor).length, "効果ブロックを選んでください。");
-  const app = { kind, adjustmentId: card.instanceId || card.id, definitionId: card.id, text: card.text, auto: card.auto, blockIndex, targetIds: [...targetIds], params: clone(params) };
+function add(editor, kind, card, blockIndex, targetIds = [], params = {}, destination = "main") {
+  if (kind !== "numeric" && destination !== "crest_effect") assert(Number.isInteger(blockIndex) && blockIndex >= 0 && blockIndex < getEffectBlocks(editor).length, "効果ブロックを選んでください。");
+  const app = { kind, adjustmentId: card.instanceId || card.id, definitionId: card.id, text: card.text, auto: card.auto, creates: card.creates, blockIndex, destination, targetIds: [...targetIds], params: clone(params) };
   if (kind === "numeric") buildDesignDraft({ ...editor, applications: [...editor.applications, app] });
   editor.applications.push(app);
 }
-export const addEffectApplication = (editor, card, blockIndex, params = {}) => add(editor, "effect", card, blockIndex, [], params);
-export const addConditionApplication = (editor, card, blockIndex, params = {}) => add(editor, "condition", card, blockIndex, [], params);
+export const addEffectApplication = (editor, card, blockIndex, params = {}, destination = "main") => add(editor, "effect", card, blockIndex, [], params, destination);
+export const addConditionApplication = (editor, card, blockIndex, params = {}, destination = "main") => add(editor, "condition", card, blockIndex, [], params, destination);
 export const addNumericApplication = (editor, card, targetIds, params) => add(editor, "numeric", card, null, targetIds, params);
-export const removeApplication = (editor, index) => editor.applications.splice(index, 1);
+export const removeApplication = (editor, index) => { const [removed] = editor.applications.splice(index, 1); if (removed?.creates === "crest_effect") editor.applications = editor.applications.filter(app => app.destination !== "crest_effect"); };
 export const addEffectBlock = editor => { editor.extraBlocks.push(""); return editor.extraBlocks.length - 1; };
 export const setEffectBlockText = (editor, index, text) => { const baseCount = Math.max(1, String(editor.base.effect || "").split(/\r?\n/).map(line => line.trim()).filter(Boolean).length); if (index < baseCount) throw new Error("原案の文章ブロックは直接編集できません。"); editor.extraBlocks[index - baseCount] = String(text || "").trim(); };
 

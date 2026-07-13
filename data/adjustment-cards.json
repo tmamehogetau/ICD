@@ -892,6 +892,7 @@
     "name": "クレスト",
     "text": "自分は『クレスト：※このカードのカード名』を持つ。",
     "auto": "crest_card_name",
+    "creates": "crest_effect",
     "copies": 1
   },
   {
