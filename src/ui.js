@@ -27,6 +27,17 @@ function adjustmentDisplayText(card) {
 const mine = () => Boolean(meeting?.private?.isActivePlayer);
 const host = () => Boolean(meeting?.viewer?.isHost);
 
+function tableManagement() {
+  if (!meeting) return "";
+  const controls = [
+    meeting.canClaimHost ? '<button type="button" class="secondary" data-action="claim-host">幹事を引き継ぐ</button>' : "",
+    meeting.canLeave ? '<button type="button" class="secondary" data-action="leave-room">卓から退出</button>' : "",
+    meeting.canClose ? '<button type="button" class="table-close" data-action="close-room">卓を閉じる</button>' : ""
+  ].filter(Boolean);
+  if (!controls.length) return "";
+  return `<section class="table-management paper"><span>卓の管理</span><div>${controls.join("")}</div>${meeting.canClaimHost ? '<small>幹事が離席して進行できない時だけ、引き継いでください。</small>' : ""}</section>`;
+}
+
 function readSession() {
   try { return JSON.parse(sessionStorage.getItem(storageKey)); } catch { return null; }
 }
@@ -35,7 +46,7 @@ function saveSession(value) {
   if (value) sessionStorage.setItem(storageKey, JSON.stringify(value)); else sessionStorage.removeItem(storageKey);
 }
 function header(title, kicker = "ONLINE MEETING") {
-  return `<div class="section-head"><div><p class="eyebrow">${kicker}</p><h2>${esc(title)}</h2></div>${meeting && meeting.stage !== "lobby" ? `<div class="round-chip"><span>ROUND</span><strong>${meeting.round}</strong><small>/ ${meeting.rounds}</small></div>` : ""}</div>`;
+  return `<div class="section-head"><div><p class="eyebrow">${kicker}</p><h2>${esc(title)}</h2></div>${meeting && meeting.stage !== "lobby" ? `<div class="round-chip"><span>ROUND</span><strong>${meeting.round}</strong><small>/ ${meeting.rounds}</small></div>` : ""}</div>${tableManagement()}`;
 }
 function baseCard(card, compact = false) {
   if (!card) return "";
@@ -188,6 +199,20 @@ async function refresh() {
   catch (error) { if (["unauthorized", "room_not_found"].includes(error.code)) { saveSession(null); meeting = null; notice = error.message; render(); } }
 }
 async function command(type, payload = {}) { const response = await api(`/api/rooms/${encodeURIComponent(session.roomCode)}/actions`, { method: "POST", body: JSON.stringify({ type, payload, version: meeting.version, actionId: crypto.randomUUID() }) }); meeting = response.state; render(); }
+async function leaveRoom() {
+  await api(`/api/rooms/${encodeURIComponent(session.roomCode)}/leave`, { method: "POST" });
+  saveSession(null);
+  meeting = null;
+  notice = "卓から退出しました。";
+  render();
+}
+async function closeRoom() {
+  await api(`/api/rooms/${encodeURIComponent(session.roomCode)}`, { method: "DELETE" });
+  saveSession(null);
+  meeting = null;
+  notice = "卓を閉じました。";
+  render();
+}
 root.addEventListener("click", async event => {
   const voteSlotButton = event.target.closest("[data-vote-slot]");
   const voteCard = event.target.closest("[data-vote-card]");
@@ -205,6 +230,9 @@ root.addEventListener("click", async event => {
   try { const action = button.dataset.action;
     if (action === "copy") { await navigator.clipboard.writeText(meeting.roomCode); notice = "卓番号をコピーしました。"; render(); return; }
     if (action === "leave") { saveSession(null); meeting = null; render(); return; }
+    if (action === "leave-room") { if (confirm("この卓から退出しますか？")) await leaveRoom(); return; }
+    if (action === "close-room") { if (confirm("この卓を閉じますか？ 参加者全員が卓に入れなくなります。")) await closeRoom(); return; }
+    if (action === "claim-host") { if (confirm("幹事を引き継ぎますか？ 幹事の進行操作を自分が行えるようになります。")) { await command("claimHost"); notice = "幹事を引き継ぎました。"; render(); } return; }
     if (action === "begin-redraw") { redrawMode = true; selectedAdjustmentId = null; render(); return; }
     if (action === "cancel-redraw") { redrawMode = false; render(); return; }
     const map = { start: "start", "begin-build": "beginBuild", "reveal-build": "revealBuildHand", "cancel-design": "cancelDesign", "begin-voting": "beginVoting", "reveal-vote": "revealRoundBallot", "continue-round": "continueRound", "begin-final-voting": "beginFinalVoting", "reveal-final-vote": "revealFinalBallot" }; if (map[action]) await command(map[action]);

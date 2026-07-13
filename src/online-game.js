@@ -52,6 +52,11 @@ function requireHost(state, playerId) {
   assert(playerId === state.hostId, "ホストだけが進行できます。 ");
 }
 
+export function transferOnlineHost(state, playerId) {
+  playerById(state, playerId);
+  state.hostId = playerId;
+}
+
 function validateCardPayload(payload) {
   assert(String(payload?.name || "").trim(), "完成カード名を入力してください。 ");
   for (const key of ["cost", "attack", "health"]) {
