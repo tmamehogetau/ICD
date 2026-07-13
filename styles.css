@@ -1158,12 +1158,3 @@ input, textarea, select { color:#442116; background:#fff1cf; border:1px solid #a
 @media (max-width:560px) {
   .vote-slot { grid-template-columns:42px minmax(0,1fr); padding:.6rem; }
 }
-/* 卓の進行を止めないための、控えめな管理用レール */
-.table-management { display:flex; flex-wrap:wrap; align-items:center; gap:.55rem 1rem; margin:-.4rem 0 1.25rem; padding:.65rem .85rem; border-left:4px solid #b23726; font-size:.76rem; }
-.table-management > span { color:#8a2b1e; font-weight:900; letter-spacing:.08em; }
-.table-management > div { display:flex; flex-wrap:wrap; gap:.45rem; }
-.table-management small { width:100%; color:#76432b; }
-.table-management .secondary, .table-management .table-close { min-height:34px; padding:.42rem .7rem; font-size:.72rem; }
-.table-close { color:#fff3d5; background:#73403a; border:1px solid #f2b957; box-shadow:0 3px 0 #3c1916, 0 6px 12px #32100655; font-weight:900; letter-spacing:.05em; }
-.table-close:hover { transform:translateY(-1px); filter:brightness(1.1); }
-@media (max-width:560px) { .table-management { margin-top:.3rem; } }

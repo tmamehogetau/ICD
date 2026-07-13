@@ -17,7 +17,6 @@ import {
   submitOnlineDesign,
   submitOnlineFinalVote,
   submitOnlineRoundVote,
-  transferOnlineHost,
   viewOnlineGame
 } from "./src/online-game.js";
 
@@ -26,8 +25,6 @@ const roomsFile = process.env.ONLINE_ROOMS_FILE || join(root, "data", "online-ro
 const port = Number(process.env.PORT || 4173);
 const mime = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".json": "application/json; charset=utf-8" };
 const rooms = new Map();
-const ROOM_IDLE_TTL_MS = 24 * 60 * 60 * 1000;
-const ROOM_CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
 
 function sendJson(res, status, body) {
   res.writeHead(status, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" });
@@ -74,20 +71,6 @@ function findMember(room, token) {
   return member;
 }
 
-function canManageFinishedRoom(room) {
-  return room.status === "lobby" || room.game?.stage === "final_results";
-}
-
-function touchRoom(room) {
-  room.updatedAt = new Date().toISOString();
-}
-
-function claimHost(room, member) {
-  if (room.hostId === member.playerId) return;
-  room.hostId = member.playerId;
-  if (room.game) transferOnlineHost(room.game, member.playerId);
-}
-
 function viewRoom(room, member) {
   if (room.status === "playing") return viewOnlineGame(room.game, member.playerId);
   return {
@@ -99,27 +82,13 @@ function viewRoom(room, member) {
     viewer: { id: member.playerId, name: member.name, isHost: member.playerId === room.hostId },
     players: room.members.map(({ playerId, name }) => ({ id: playerId, name, total: 0 })),
     canStart: member.playerId === room.hostId && room.members.length >= 3,
-    canLeave: canManageFinishedRoom(room),
-    canClose: member.playerId === room.hostId && canManageFinishedRoom(room),
-    canClaimHost: member.playerId !== room.hostId && room.game?.stage !== "final_results",
     note: "3〜6人がそろったら、ホストがゲームを開始します。"
   };
 }
 
 function viewWithRoomData(room, member) {
   const state = viewRoom(room, member);
-  const canManage = canManageFinishedRoom(room);
-  return {
-    roomCode: room.code,
-    version: room.version,
-    state: {
-      ...state,
-      version: room.version,
-      canLeave: canManage,
-      canClose: member.playerId === room.hostId && canManage,
-      canClaimHost: member.playerId !== room.hostId && room.game?.stage !== "final_results"
-    }
-  };
+  return { roomCode: room.code, version: room.version, state: { ...state, version: room.version } };
 }
 
 async function readJson(req) {
@@ -159,10 +128,7 @@ async function loadRooms() {
         if (room.game.stage === "exchange") room.game.stage = "build";
         if (!room.game.redrawCounts) room.game.redrawCounts = Object.fromEntries((room.game.exchangedPlayers || []).map(playerId => [playerId, 1]));
         delete room.game.exchangedPlayers;
-      }
-      room.createdAt = room.createdAt || new Date().toISOString();
-      room.updatedAt = room.updatedAt || room.createdAt;
-      rooms.set(room.code, room);
+      }      rooms.set(room.code, room);
     }
     console.log(`オンラインルームを${rooms.size}件復元しました。`);
   } catch (error) {
@@ -171,7 +137,7 @@ async function loadRooms() {
 }
 
 function requireCurrentVersion(room, version, member, actionType) {
-  const concurrentAction = ["exchange", "submitDesign", "cancelDesign", "submitRoundVote", "submitFinalVote", "claimHost"].includes(actionType);
+  const concurrentAction = ["exchange", "submitDesign", "cancelDesign", "submitRoundVote", "submitFinalVote"].includes(actionType);
   if (!Number.isInteger(version) || (version !== room.version && !concurrentAction)) {
     const error = new Error("画面が古くなっています。再読み込みしてください。 ");
     error.status = 409;
@@ -195,8 +161,7 @@ async function createRoom(req, res) {
     members: [{ playerId, name, token }],
     processedActions: [],
     game: null,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    createdAt: new Date().toISOString()
   };
   rooms.set(room.code, room);
   await saveRooms();
@@ -205,15 +170,20 @@ async function createRoom(req, res) {
 
 async function joinRoom(req, res, code) {
   const room = findRoom(code);
-  if (room.status !== "lobby") throw new Error("このルームはすでに開始しています。 ");
-  if (room.members.length >= 6) throw new Error("このルームは満員です。 ");
   const body = await readJson(req);
   const name = cleanName(body.name);
-  if (room.members.some(member => member.name === name)) throw new Error("同じ名前では参加できません。 ");
+  const reconnectingMember = room.members.find(member => member.name === name);
+  if (reconnectingMember) {
+    reconnectingMember.token = createToken();
+    room.version += 1;
+    await saveRooms();
+    return sendJson(res, 200, { token: reconnectingMember.token, playerId: reconnectingMember.playerId, ...viewWithRoomData(room, reconnectingMember) });
+  }
+  if (room.status !== "lobby") throw new Error("このルームはすでに開始しています。卓番号と参加時の名前を入力して復帰してください。 ");
+  if (room.members.length >= 6) throw new Error("このルームは満員です。 ");
   const member = { playerId: `p${room.members.length + 1}`, name, token: createToken() };
   room.members.push(member);
   room.version += 1;
-  touchRoom(room);
   await saveRooms();
   sendJson(res, 201, { token: member.token, playerId: member.playerId, ...viewWithRoomData(room, member) });
 }
@@ -227,7 +197,6 @@ function startGame(room, member) {
 }
 
 function applyAction(room, member, type, payload) {
-  if (type === "claimHost") return claimHost(room, member);
   if (type === "start") return startGame(room, member);
   if (room.status !== "playing") throw new Error("ゲームがまだ開始されていません。 ");
   const state = room.game;
@@ -262,54 +231,10 @@ async function handleAction(req, res, code) {
   requireCurrentVersion(room, body.version, member, String(body.type || ""));
   applyAction(room, member, String(body.type || ""), body.payload || {});
   room.version += 1;
-  touchRoom(room);
   room.processedActions.push({ id: actionId, playerId: member.playerId });
   room.processedActions = room.processedActions.slice(-100);
   await saveRooms();
   sendJson(res, 200, viewWithRoomData(room, member));
-}
-
-async function leaveRoom(req, res, code) {
-  const room = findRoom(code);
-  const member = findMember(room, getBearerToken(req));
-  if (!canManageFinishedRoom(room)) throw new Error("ゲーム中は退出できません。幹事が離席した場合は、ほかの参加者が幹事を引き継いでください。 ");
-  room.members = room.members.filter(candidate => candidate.playerId !== member.playerId);
-  if (!room.members.length) {
-    rooms.delete(room.code);
-    await saveRooms();
-    return sendJson(res, 200, { left: true, roomClosed: true });
-  }
-  if (room.hostId === member.playerId) claimHost(room, room.members[0]);
-  room.version += 1;
-  touchRoom(room);
-  await saveRooms();
-  sendJson(res, 200, { left: true, roomClosed: false });
-}
-
-async function closeRoom(req, res, code) {
-  const room = findRoom(code);
-  const member = findMember(room, getBearerToken(req));
-  if (member.playerId !== room.hostId) throw new Error("幹事だけが卓を閉じられます。 ");
-  if (!canManageFinishedRoom(room)) throw new Error("ゲーム中は卓を閉じられません。 ");
-  rooms.delete(room.code);
-  await saveRooms();
-  sendJson(res, 200, { left: true, roomClosed: true });
-}
-
-async function cleanupExpiredRooms() {
-  const threshold = Date.now() - ROOM_IDLE_TTL_MS;
-  let removed = 0;
-  for (const [code, room] of rooms) {
-    const updatedAt = Date.parse(room.updatedAt || room.createdAt || "");
-    if (Number.isFinite(updatedAt) && updatedAt < threshold) {
-      rooms.delete(code);
-      removed += 1;
-    }
-  }
-  if (removed) {
-    await saveRooms();
-    console.log(`放置されたオンラインルームを${removed}件削除しました。`);
-  }
 }
 
 async function getState(req, res, code) {
@@ -333,13 +258,10 @@ const server = createServer(async (req, res) => {
     const joinMatch = /^\/api\/rooms\/([A-Za-z0-9]+)\/join$/u.exec(pathname);
     const actionMatch = /^\/api\/rooms\/([A-Za-z0-9]+)\/actions$/u.exec(pathname);
     const stateMatch = /^\/api\/rooms\/([A-Za-z0-9]+)\/state$/u.exec(pathname);
-    const leaveMatch = /^\/api\/rooms\/([A-Za-z0-9]+)\/leave$/u.exec(pathname);
     if (req.method === "GET" && pathname === "/api/keepalive") return sendKeepAlive(res);
     if (req.method === "POST" && pathname === "/api/rooms") return await createRoom(req, res);
     if (req.method === "POST" && joinMatch) return await joinRoom(req, res, joinMatch[1]);
     if (req.method === "POST" && actionMatch) return await handleAction(req, res, actionMatch[1]);
-    if (req.method === "POST" && leaveMatch) return await leaveRoom(req, res, leaveMatch[1]);
-    if (req.method === "DELETE" && /^\/api\/rooms\/([A-Za-z0-9]+)$/u.test(pathname)) return await closeRoom(req, res, pathname.split("/").at(-1));
     if (req.method === "GET" && stateMatch) return await getState(req, res, stateMatch[1]);
     if (req.method === "GET" || req.method === "HEAD") return await serveStatic(req, res);
     sendJson(res, 405, { error: "Method Not Allowed" });
@@ -350,9 +272,6 @@ const server = createServer(async (req, res) => {
 });
 
 await loadRooms();
-await cleanupExpiredRooms();
-setInterval(() => cleanupExpiredRooms().catch(error => console.error("放置ルームの整理に失敗しました。", error.message)), ROOM_CLEANUP_INTERVAL_MS).unref();
 server.listen(port, () => console.log(`居酒屋開発会議: http://localhost:${port}`));
-
 
 

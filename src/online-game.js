@@ -52,11 +52,6 @@ function requireHost(state, playerId) {
   assert(playerId === state.hostId, "ホストだけが進行できます。 ");
 }
 
-export function transferOnlineHost(state, playerId) {
-  playerById(state, playerId);
-  state.hostId = playerId;
-}
-
 function validateCardPayload(payload) {
   assert(String(payload?.name || "").trim(), "完成カード名を入力してください。 ");
   for (const key of ["cost", "attack", "health"]) {
@@ -396,5 +391,4 @@ export function viewOnlineGame(state, viewerId) {
     note: "手札は閲覧者本人だけ、投票は各投票者本人だけに返します。公開結果には票の内訳を含めません。"
   };
 }
-
 

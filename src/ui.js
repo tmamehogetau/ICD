@@ -27,17 +27,6 @@ function adjustmentDisplayText(card) {
 const mine = () => Boolean(meeting?.private?.isActivePlayer);
 const host = () => Boolean(meeting?.viewer?.isHost);
 
-function tableManagement() {
-  if (!meeting) return "";
-  const controls = [
-    meeting.canClaimHost ? '<button type="button" class="secondary" data-action="claim-host">幹事を引き継ぐ</button>' : "",
-    meeting.canLeave ? '<button type="button" class="secondary" data-action="leave-room">卓から退出</button>' : "",
-    meeting.canClose ? '<button type="button" class="table-close" data-action="close-room">卓を閉じる</button>' : ""
-  ].filter(Boolean);
-  if (!controls.length) return "";
-  return `<section class="table-management paper"><span>卓の管理</span><div>${controls.join("")}</div>${meeting.canClaimHost ? '<small>幹事が離席して進行できない時だけ、引き継いでください。</small>' : ""}</section>`;
-}
-
 function readSession() {
   try { return JSON.parse(sessionStorage.getItem(storageKey)); } catch { return null; }
 }
@@ -46,7 +35,7 @@ function saveSession(value) {
   if (value) sessionStorage.setItem(storageKey, JSON.stringify(value)); else sessionStorage.removeItem(storageKey);
 }
 function header(title, kicker = "ONLINE MEETING") {
-  return `<div class="section-head"><div><p class="eyebrow">${kicker}</p><h2>${esc(title)}</h2></div>${meeting && meeting.stage !== "lobby" ? `<div class="round-chip"><span>ROUND</span><strong>${meeting.round}</strong><small>/ ${meeting.rounds}</small></div>` : ""}</div>${tableManagement()}`;
+  return `<div class="section-head"><div><p class="eyebrow">${kicker}</p><h2>${esc(title)}</h2></div>${meeting && meeting.stage !== "lobby" ? `<div class="round-chip"><span>ROUND</span><strong>${meeting.round}</strong><small>/ ${meeting.rounds}</small></div>` : ""}</div>`;
 }
 function baseCard(card, compact = false) {
   if (!card) return "";
@@ -63,7 +52,7 @@ function waiting(title, detail) {
 }
 function setup() {
   if (location.hash) history.replaceState(null, "", location.pathname);
-  root.innerHTML = `${header("今夜の卓を開く", "IZAKAYA / OPEN TABLE")}<section class="setup-sheet paper"><div class="red-note">3〜6名<br>各自の端末で参加</div><div class="online-intro"><b>招待制・アカウント不要</b><span>手札と未公開票は本人だけに届きます。</span></div><label class="wide player-name-field">あなたの名前<input id="player-name" maxlength="16" value="先輩" required></label><div class="table-entry"><form id="create-form"><fieldset><legend>新しい卓を作る</legend><p class="agreement">今夜は全4ラウンド。最終看板カードのボーナスは3点です。</p><button class="primary stamp-button">卓を作成する</button></fieldset></form><form id="join-form" class="join-form"><fieldset><legend>卓番号で参加</legend><label>卓番号<input name="code" maxlength="7" required></label><button class="secondary">卓に参加する</button></fieldset></form></div></section>`;
+  root.innerHTML = `${header("今夜の卓を開く", "IZAKAYA / OPEN TABLE")}<section class="setup-sheet paper"><div class="red-note">3〜6名<br>各自の端末で参加</div><div class="online-intro"><b>招待制・アカウント不要</b><span>手札と未公開票は本人だけに届きます。</span></div><label class="wide player-name-field">あなたの名前<input id="player-name" maxlength="16" value="先輩" required></label><div class="table-entry"><form id="create-form"><fieldset><legend>新しい卓を作る</legend><p class="agreement">今夜は全4ラウンド。最終看板カードのボーナスは3点です。</p><button class="primary stamp-button">卓を作成する</button></fieldset></form><form id="join-form" class="join-form"><fieldset><legend>卓番号で参加・復帰</legend><label>卓番号<input name="code" maxlength="7" required></label><p class="agreement">同じ名前で入り直すと、元の参加者として復帰します。</p><button class="secondary">卓に参加する</button></fieldset></form></div></section>`;
 }
 function lobby() {
   root.innerHTML = `${header("飲み仲間を待っています", "IZAKAYA / TABLE WAITING")}<section class="setup-sheet paper"><div class="red-note angled">卓番号<br>${esc(meeting.roomCode)}</div><h3>卓番号を共有</h3><div class="invite-row"><code>${esc(meeting.roomCode)}</code><button class="secondary" data-action="copy">卓番号をコピー</button></div><p class="agreement">参加者はトップ画面の「卓に参加する」から、この卓番号を入力してください。</p><div class="rule-summary"><span>飲み仲間 ${meeting.players.length} / 6名</span><span>乾杯は3名から</span><span>幹事：${esc(meeting.players.find(player => player.id === meeting.hostId)?.name || "")}</span></div><section class="scoreboard paper"><h3>今夜の飲み仲間</h3>${meeting.players.map((item, index) => `<div><span>${String(index + 1).padStart(2, "0")}</span><b>${esc(item.name)}</b><strong>${item.id === meeting.hostId ? "幹事" : "参加済み"}</strong></div>`).join("")}</section>${host() ? `<button class="primary stamp-button" data-action="start" ${meeting.players.length < 3 ? "disabled" : ""}>乾杯して始める</button>` : '<p class="agreement">幹事が乾杯して始めるのを待っています。</p>'}</section>`;
@@ -199,20 +188,6 @@ async function refresh() {
   catch (error) { if (["unauthorized", "room_not_found"].includes(error.code)) { saveSession(null); meeting = null; notice = error.message; render(); } }
 }
 async function command(type, payload = {}) { const response = await api(`/api/rooms/${encodeURIComponent(session.roomCode)}/actions`, { method: "POST", body: JSON.stringify({ type, payload, version: meeting.version, actionId: crypto.randomUUID() }) }); meeting = response.state; render(); }
-async function leaveRoom() {
-  await api(`/api/rooms/${encodeURIComponent(session.roomCode)}/leave`, { method: "POST" });
-  saveSession(null);
-  meeting = null;
-  notice = "卓から退出しました。";
-  render();
-}
-async function closeRoom() {
-  await api(`/api/rooms/${encodeURIComponent(session.roomCode)}`, { method: "DELETE" });
-  saveSession(null);
-  meeting = null;
-  notice = "卓を閉じました。";
-  render();
-}
 root.addEventListener("click", async event => {
   const voteSlotButton = event.target.closest("[data-vote-slot]");
   const voteCard = event.target.closest("[data-vote-card]");
@@ -230,9 +205,6 @@ root.addEventListener("click", async event => {
   try { const action = button.dataset.action;
     if (action === "copy") { await navigator.clipboard.writeText(meeting.roomCode); notice = "卓番号をコピーしました。"; render(); return; }
     if (action === "leave") { saveSession(null); meeting = null; render(); return; }
-    if (action === "leave-room") { if (confirm("この卓から退出しますか？")) await leaveRoom(); return; }
-    if (action === "close-room") { if (confirm("この卓を閉じますか？ 参加者全員が卓に入れなくなります。")) await closeRoom(); return; }
-    if (action === "claim-host") { if (confirm("幹事を引き継ぎますか？ 幹事の進行操作を自分が行えるようになります。")) { await command("claimHost"); notice = "幹事を引き継ぎました。"; render(); } return; }
     if (action === "begin-redraw") { redrawMode = true; selectedAdjustmentId = null; render(); return; }
     if (action === "cancel-redraw") { redrawMode = false; render(); return; }
     const map = { start: "start", "begin-build": "beginBuild", "reveal-build": "revealBuildHand", "cancel-design": "cancelDesign", "begin-voting": "beginVoting", "reveal-vote": "revealRoundBallot", "continue-round": "continueRound", "begin-final-voting": "beginFinalVoting", "reveal-final-vote": "revealFinalBallot" }; if (map[action]) await command(map[action]);
@@ -358,7 +330,6 @@ root.addEventListener("click", async event => {
     await command("exchange", { cardIds: [card.dataset.redrawCard] });
   } catch (error) { notice = error.message; await refresh(); render(); }
 });
-
 
 
 
