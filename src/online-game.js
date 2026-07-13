@@ -90,7 +90,7 @@ function publicDesign(design, revealScore = false) {
       return adjustment ? { id: adjustment.id, name: adjustment.name, category: adjustment.category, text: adjustment.text } : null;
     }).filter(Boolean)
   };
-  if (revealScore) Object.assign(card, { appeal: design.appeal, overpowered: design.overpowered, score: design.score });
+  if (revealScore) Object.assign(card, { appeal: design.appeal, twoVotes: design.twoVotes, oneVotes: design.oneVotes, overpowered: design.overpowered, score: design.score });
   return card;
 }
 
@@ -98,6 +98,7 @@ function calculateRound(state) {
   for (const design of state.designs) {
     design.appeal = state.ballots.reduce((score, ballot) => score + (ballot.two === design.id ? 2 : 0) + (ballot.one === design.id ? 1 : 0), 0);
     design.twoVotes = state.ballots.filter(ballot => ballot.two === design.id).length;
+    design.oneVotes = state.ballots.filter(ballot => ballot.one === design.id).length;
     design.overpowered = design.twoVotes === state.players.length - 1;
     design.score = scoreFromVotes(design.appeal, design.overpowered);
     playerById(state, design.playerId).total += design.score;
@@ -284,6 +285,14 @@ export function submitOnlineRoundVote(state, playerId, { two = null, one = null 
   }
 }
 
+export function cancelOnlineRoundVote(state, playerId) {
+  assert(state.stage === "vote", "今は投票を取り消せません。 ");
+  assert(state.ballots.length < state.players.length, "全員の投票後は取り消せません。 ");
+  const ballotIndex = state.ballots.findIndex(ballot => ballot.voterId === playerId);
+  assert(ballotIndex >= 0, "提出済みの投票がありません。 ");
+  state.ballots.splice(ballotIndex, 1);
+}
+
 export function continueOnlineRound(state, playerId = state.hostId) {
   requireHost(state, playerId);
   assert(state.stage === "round_results", "ラウンド結果画面ではありません。 ");
@@ -320,6 +329,14 @@ export function submitOnlineFinalVote(state, playerId, { two = null, one = null 
   if (state.finalBallots.length === state.players.length) {
     calculateFinal(state);
   }
+}
+
+export function cancelOnlineFinalVote(state, playerId) {
+  assert(state.stage === "final_vote", "今は決選投票を取り消せません。 ");
+  assert(state.finalBallots.length < state.players.length, "全員の決選投票後は取り消せません。 ");
+  const ballotIndex = state.finalBallots.findIndex(ballot => ballot.voterId === playerId);
+  assert(ballotIndex >= 0, "提出済みの決選投票がありません。 ");
+  state.finalBallots.splice(ballotIndex, 1);
 }
 
 export function getOnlineRankings(state) {
@@ -384,6 +401,8 @@ export function viewOnlineGame(state, viewerId) {
       canRedraw: phase === "build" && (state.redrawCounts[viewerId] || 0) < 2,
       redrawsUsed: state.redrawCounts[viewerId] || 0,
       canCancelDesign: state.stage === "build" && designSubmitted && state.designs.length < state.players.length,
+      canCancelRoundVote: state.stage === "vote" && Boolean(ownRoundBallot) && state.ballots.length < state.players.length,
+      canCancelFinalVote: state.stage === "final_vote" && Boolean(ownFinalBallot) && state.finalBallots.length < state.players.length,
       submittedDesign: ownDesign ? publicDesign(ownDesign) : null,
       roundBallot: ownRoundBallot ? clone(ownRoundBallot) : null,
       finalBallot: ownFinalBallot ? clone(ownFinalBallot) : null

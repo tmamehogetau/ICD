@@ -6,6 +6,8 @@ import { fileURLToPath } from "node:url";
 import {
   beginOnlineBuild,
   cancelOnlineDesign,
+  cancelOnlineFinalVote,
+  cancelOnlineRoundVote,
   beginOnlineFinalVoting,
   beginOnlineVoting,
   continueOnlineRound,
@@ -137,7 +139,7 @@ async function loadRooms() {
 }
 
 function requireCurrentVersion(room, version, member, actionType) {
-  const concurrentAction = ["exchange", "submitDesign", "cancelDesign", "submitRoundVote", "submitFinalVote"].includes(actionType);
+  const concurrentAction = ["exchange", "submitDesign", "cancelDesign", "submitRoundVote", "cancelRoundVote", "submitFinalVote", "cancelFinalVote"].includes(actionType);
   if (!Number.isInteger(version) || (version !== room.version && !concurrentAction)) {
     const error = new Error("画面が古くなっています。再読み込みしてください。 ");
     error.status = 409;
@@ -209,10 +211,12 @@ function applyAction(room, member, type, payload) {
     case "beginVoting": return beginOnlineVoting(state, member.playerId);
     case "revealRoundBallot": return revealOnlineRoundBallot(state, member.playerId);
     case "submitRoundVote": return submitOnlineRoundVote(state, member.playerId, payload);
+    case "cancelRoundVote": return cancelOnlineRoundVote(state, member.playerId);
     case "continueRound": return continueOnlineRound(state, member.playerId);
     case "beginFinalVoting": return beginOnlineFinalVoting(state, member.playerId);
     case "revealFinalBallot": return revealOnlineFinalBallot(state, member.playerId);
     case "submitFinalVote": return submitOnlineFinalVote(state, member.playerId, payload);
+    case "cancelFinalVote": return cancelOnlineFinalVote(state, member.playerId);
     default: throw new Error("不明なアクションです。 ");
   }
 }

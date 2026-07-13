@@ -1158,3 +1158,13 @@ input, textarea, select { color:#442116; background:#fff1cf; border:1px solid #a
 @media (max-width:560px) {
   .vote-slot { grid-template-columns:42px minmax(0,1fr); padding:.6rem; }
 }
+/* 採点札は票種ごとの点数を一目で追えるようにする */
+.score-breakdown { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:.2rem .7rem; align-items:center; }
+.score-breakdown span, .score-breakdown b, .score-breakdown em { font-size:.66rem; font-style:normal; }
+.score-breakdown b { grid-column:1; }
+.score-breakdown em { color:#8d251d; font-weight:900; }
+.score-breakdown strong { grid-column:2; grid-row:1 / span 3; align-self:center; }
+.winner-showcase { max-width:1120px; margin:2.4rem auto; }
+.winner-showcase > h3 { margin:0 0 1.15rem; color:#ffe7a3; text-align:center; font:700 1.55rem "Kaisei Decol",serif; text-shadow:0 2px #532015; }
+.ballot-summary { display:grid; gap:.55rem; max-width:360px; margin:1rem auto; padding:1rem; border:1px dashed #a85b31; background:#fff0cf; }
+.ballot-summary span { font-weight:900; }
