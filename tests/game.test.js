@@ -211,11 +211,11 @@ test("ヤバい票は別候補・自分以外、全員2点票のカードを0点
   assert.equal(game.bestCards[0].playerId, game.players[1].id);
 });
 
-test("4ラウンド決選の看板ボーナスは3点、最終順位を返す", () => {
+test("4ラウンド決選の看板ボーナスはヤバすぎ補正を受けず3点、最終順位を返す", () => {
   const game = createGame({ names, rounds: 4, rng });
   game.stage = "final_overview";
   game.bestCards = [
-    { id: "c1", playerId: "p1", playerName: names[0], name: "A" },
+    { id: "c1", playerId: "p1", playerName: names[0], name: "A", overpowered: true, score: 0 },
     { id: "c2", playerId: "p2", playerName: names[1], name: "B" },
     { id: "c3", playerId: "p3", playerName: names[2], name: "C" }
   ];

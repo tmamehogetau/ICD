@@ -45,8 +45,8 @@ function adjustCard(card, controls = "") {
   return `<article class="adjust-card">${controls}<span class="clip" aria-hidden="true"></span><p class="category">${esc(card.category)}調整</p><h4>${esc(card.name)}</h4><p>${esc(adjustmentDisplayText(card))}</p></article>`;
 }
 function designCard(card, scores = false, final = false) {
-  const scoreDetails = scores ? `<div class="score-strip score-breakdown"><span>2点票 ${card.twoVotes || 0}票 ×2＝${(card.twoVotes || 0) * 2}</span><span>1点票 ${card.oneVotes || 0}票 ×1＝${card.oneVotes || 0}</span><b>ヤバさ：${card.appeal || 0}点</b>${card.overpowered ? "<em>ヤバすぎ：0点</em>" : ""}<strong>${card.score || 0}点</strong></div>` : "";
-  const finalDetails = final ? `<div class="score-strip"><span>決選魅力票</span><strong>${card.finalAppeal || 0}点</strong></div>` : "";
+  const scoreDetails = scores && !final ? `<div class="score-strip score-breakdown"><span>2点票 ${card.twoVotes || 0}票 ×2＝${(card.twoVotes || 0) * 2}</span><span>1点票 ${card.oneVotes || 0}票 ×1＝${card.oneVotes || 0}</span><b>ヤバさ：${card.appeal || 0}点</b>${card.overpowered ? "<em>ヤバすぎ：0点</em>" : ""}<strong>${card.score || 0}点</strong></div>` : "";
+  const finalDetails = final ? `<div class="score-strip final-vote-strip"><span>決選得票 ${card.finalAppeal || 0}票</span><b>決選得票は累計に加算しません</b><strong>最多得票：担当 +3点</strong></div>` : "";
   return `<article class="design-card legend-card"><div class="author-tab">${esc(card.name)}</div><div class="card-top"><span class="cost">${card.cost}</span><div><p class="card-class">${esc(card.class)}</p></div></div><p class="effect">${card.effect ? nl(card.effect) : '<span class="blank-effect">能力なし</span>'}</p><div class="stats"><strong>${card.attack}</strong><span class="card-owner">担当：${esc(card.playerName)}</span><strong>${card.health}</strong></div>${scoreDetails}${finalDetails}</article>`;
 }
 function waiting(title, detail) {
