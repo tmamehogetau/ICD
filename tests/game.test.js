@@ -78,11 +78,14 @@ test("数値カードは指定どおり複製され、実体IDで同時使用で
   assert.equal(DRAW_ADJUSTMENTS.filter(card => card.category === "数値").reduce((sum, card) => sum + card.copies, 0), 26);
   assert.ok(DRAW_ADJUSTMENTS.filter(card => card.category === "数値").every(card => ["a13", "a14"].includes(card.id) ? card.copies === 1 : card.copies === 2));
   assert.ok(DRAW_ADJUSTMENTS.filter(card => card.category !== "数値").every(card => card.copies === 1));
-  assert.equal(DRAW_ADJUSTMENT_INSTANCES.length, 138);
+  assert.equal(DRAW_ADJUSTMENT_INSTANCES.length, 139);
   assert.equal(DRAW_ADJUSTMENT_INSTANCES.length, DRAW_ADJUSTMENTS.reduce((sum, card) => sum + card.copies, 0));
   assert.deepEqual(DRAW_ADJUSTMENT_INSTANCES.filter(id => getAdjustmentDefinitionId(id) === "a1"), ["a1#1", "a1#2"]);
   assert.equal(getAdjustment("a1#2").name, "全部盛り");
   assert.deepEqual(getAdjustment("a126"), { id: "a126", category: "効果", name: "クレスト", text: "自分は『クレスト：※このカードのカード名』を持つ。", auto: "crest_card_name", creates: "crest_effect", copies: 1 });
+  assert.deepEqual(getAdjustment("a127"), { id: "a127", category: "条件", name: "エンハンス10", text: "【エンハンス_10】", copies: 1 });
+  assert.deepEqual(getAdjustment("a95")?.choices, ["スペルブースト", "土の秘術", "エンハンス", "回復", "進化"]);
+  assert.match(getAdjustment("a111")?.text || "", /（１）\n（２）/u);
   assert.equal(BASIC_ADJUSTMENTS.find(card => card.id === "b10")?.text, "自分のターン終了時、");
 
   const game = createGame({ names, rounds: 4, rng });
@@ -224,6 +227,7 @@ test("4ラウンド決選の看板ボーナスは3点、最終順位を返す", 
   submitFinalVote(game, { two: "c1", one: "c2" });
   assert.equal(game.stage, "final_results");
   assert.equal(game.signage[0].id, "c1");
+  assert.equal(game.signage[0].finalAppeal, 4);
   assert.equal(game.players[0].total, 3);
   assert.equal(getRankings(game)[0].id, "p1");
 });
