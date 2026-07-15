@@ -58,7 +58,8 @@ test("管理用JSONは固定IDと必須項目を保つ", () => {
     assert.ok(categories.has(card.category));
     assert.ok(Number.isInteger(card.copies) && card.copies >= 1);
     assert.equal(card.text.includes("※"), card.auto === "crest_card_name");
-    assert.equal(card.creates === "crest_effect", card.id === "a126");
+    const creates = card.id === "a126" ? "crest_effect" : card.id === "a111" ? "mode_blocks" : undefined;
+    assert.equal(card.creates, creates);
     if (card.choices) assert.ok(Array.isArray(card.choices) && card.choices.length >= 2);
   }
 
@@ -85,7 +86,7 @@ test("数値カードは指定どおり複製され、実体IDで同時使用で
   assert.deepEqual(getAdjustment("a126"), { id: "a126", category: "効果", name: "クレスト", text: "自分は『クレスト：※このカードのカード名』を持つ。", auto: "crest_card_name", creates: "crest_effect", copies: 1 });
   assert.deepEqual(getAdjustment("a127"), { id: "a127", category: "条件", name: "エンハンス10", text: "【エンハンス_10】", copies: 1 });
   assert.deepEqual(getAdjustment("a95")?.choices, ["スペルブースト", "土の秘術", "エンハンス", "回復", "進化"]);
-  assert.match(getAdjustment("a111")?.text || "", /（１）\n（２）/u);
+  assert.deepEqual(getAdjustment("a111"), { id: "a111", category: "効果", name: "モード", text: "このカードに【モード】を追加する。", creates: "mode_blocks", copies: 1 });
   assert.equal(BASIC_ADJUSTMENTS.find(card => card.id === "b10")?.text, "自分のターン終了時、");
 
   const game = createGame({ names, rounds: 4, rng });

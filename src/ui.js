@@ -85,12 +85,12 @@ function numericPicker(selected) {
   const countHint = { a1:"1〜3個",a2:"1個",a3:"1個",a4:"1個",a5:"攻撃力か体力",a6:"選択不要",a7:"1個",a8:"2個（先→後）",a9:"2個",a10:"1個以上",a11:"1個以上",a12:"2個（+2→-2）",a13:"1個",a14:"効果内1個" }[selected.id] || "対象を選択";
   return `<section class="placement-panel paper"><p class="eyebrow">NUMERIC PLACEMENT</p><h3>${esc(selected.name)} <small>${esc(countHint)}</small></h3><p>${esc(selected.text)}</p>${selected.id === "a3" ? `<div class="choice-row compact-choice"><label class="radio-card"><input type="radio" name="numeric-delta" value="1" checked><b>＋1</b></label><label class="radio-card"><input type="radio" name="numeric-delta" value="-1"><b>−1</b></label></div>` : ""}<div class="target-grid">${targets.map(target => `<div class="number-target ${selectedIds.has(target.id) ? "selected" : ""}"><button type="button" data-number-target="${target.id}"><b>${esc(target.label)}</b><strong>${target.value}</strong></button>${["a10","a11"].includes(selected.id) && selectedIds.has(target.id) ? `<label>配分<input aria-label="${esc(target.label)}への振り分け" data-delta-target="${target.id}" type="number" value="${pendingDeltas[target.id] ?? 0}"></label>` : ""}</div>`).join("")}</div><div class="placement-actions"><button type="button" class="secondary" data-action="cancel-adjustment">選び直す</button><button type="button" class="primary" data-action="apply-numeric">この数値配置を反映</button></div></section>`;
 }
-function effectPlacementPicker(selected, hasCrestEffect) {
+function effectPlacementPicker(selected, hasCrestEffect, hasModeBlocks) {
   const choices = selected.choices || [];
   const choiceButtons = choices.length ? `<div class="choice-row effect-choice-row">${choices.map(choice => `<button type="button" class="secondary ${pendingChoice === choice ? "selected" : ""}" data-effect-choice="${esc(choice)}">${esc(choice)}</button>`).join("")}</div>` : "";
   const instruction = choices.length && !pendingChoice
     ? "先に能力を1つ選んでください。"
-    : hasCrestEffect ? "完成予定カードの効果ブロック、またはクレスト効果欄を選択してください。" : "完成予定カードの効果ブロックを選択してください。";
+    : hasCrestEffect || hasModeBlocks ? "完成予定カードの効果ブロック、クレスト効果欄、またはモード欄を選択してください。" : "完成予定カードの効果ブロックを選択してください。";
   return `<section class="placement-panel paper"><p class="eyebrow">${esc(selected.category)} PLACEMENT</p><h3>${esc(selected.name)}</h3><p>${esc(adjustmentDisplayText(selected))}</p>${choiceButtons}<b>${instruction}</b><button type="button" class="secondary" data-action="cancel-adjustment">選び直す</button></section>`;
 }
 function submittedDesign() {
@@ -105,7 +105,7 @@ function build() {
   editor.cardName = draftName || meeting.base.name;
   const draft = buildDesignDraft(editor), selected = selectedAdjustment(), applied = appliedAdjustmentIds();
   const hand = meeting.private?.hand || [], basics = meeting.private?.basicAdjustments || BASIC_ADJUSTMENTS;
-  const picker = selected?.category === "数値" ? numericPicker(selected) : selected ? effectPlacementPicker(selected, Boolean(draft.crest)) : "";
+  const picker = selected?.category === "数値" ? numericPicker(selected) : selected ? effectPlacementPicker(selected, Boolean(draft.crest), Boolean(draft.modeBlocks?.length)) : "";
   const selectableCard = card => {
     const id = card.instanceId || card.id;
     if (redrawMode) {
@@ -252,6 +252,7 @@ root.addEventListener("click", event => {
   const numberTarget = event.target.closest("[data-number-target]");
   const effectBlock = event.target.closest("[data-block-index]");
   const crestEffectBlock = event.target.closest("[data-effect-destination]");
+  const modeEffectBlock = event.target.closest("[data-mode-destination]");
   const button = event.target.closest("[data-action]");
   try {
     if (effectChoice) { pendingChoice = effectChoice.dataset.effectChoice; render(); return; }
@@ -260,6 +261,13 @@ root.addEventListener("click", event => {
       pendingTargets = pendingTargets.includes(target) ? pendingTargets.filter(item => item !== target) : [...pendingTargets, target];
       render();
       return;
+    }
+    if (modeEffectBlock && selectedAdjustment() && ["効果", "条件"].includes(selectedAdjustment().category)) {
+      const card = selectedAdjustment(); ensureApplicationLimit(card);
+      if (card.choices?.length && !pendingChoice) throw new Error("能力を1つ選んでください。");
+      const params = pendingChoice ? { choice: pendingChoice } : {};
+      if (card.category === "効果") addEffectApplication(editor, card, 0, params, modeEffectBlock.dataset.modeDestination); else addConditionApplication(editor, card, 0, params, modeEffectBlock.dataset.modeDestination);
+      selectedAdjustmentId = null; pendingTargets = []; pendingDeltas = {}; pendingChoice = ""; render(); return;
     }
     if (crestEffectBlock && selectedAdjustment() && ["効果", "条件"].includes(selectedAdjustment().category)) {
       const card = selectedAdjustment(); ensureApplicationLimit(card);
@@ -333,8 +341,9 @@ function planCard(draft, selected) {
     const additions = [...block.prefixes.map(text => `<span class="change-mark">${esc(text)}</span>`), markedBlockText(block.text, index), ...block.suffixes.map(text => `<span class="change-mark">${esc(text)}</span>`)].filter(Boolean).join(" ");
     return `<section class="effect-block ${canPlace ? "targetable" : ""}"><button type="button" data-block-index="${index}"><small>BLOCK ${String(index + 1).padStart(2, "0")}</small>${additions || "<i>新しい文章ブロック</i>"}</button></section>`;
   }).join("");
+  const modes = (draft.modeBlocks || []).map(block => `<section class="effect-block mode-effect-block ${canPlace ? "targetable" : ""}"><button type="button" data-mode-destination="mode_${block.mode}"><small>MODE ${block.mode}</small>${[block.text, ...block.prefixes.map(text => `<span class="change-mark">${esc(text)}</span>`), ...block.suffixes.map(text => `<span class="change-mark">${esc(text)}</span>`)].filter(Boolean).join(" ")}</button></section>`).join("");
   const crest = draft.crest ? `<section class="crest-effect-slot ${canPlace ? "targetable" : ""}"><button type="button" data-effect-destination="crest_effect"><small>CREST EFFECT</small><b>クレスト効果</b><span>${draft.crest.rendered ? [...draft.crest.prefixes, ...draft.crest.suffixes].map(text => `<span class="change-mark">${esc(text)}</span>`).join(" ") : "<i>ここに条件・効果カードを配置</i>"}</span></button></section>` : "";
-  return `<article class="design-card legend-card plan-card"><div class="author-tab">${esc(draftName || meeting.base.name)}</div><div class="card-top"><span class="cost ${draft.cost !== meeting.base.cost ? "changed-value" : ""}">${draft.cost}</span><div><p class="card-class">${esc(meeting.base.class)}</p><small class="plan-note">赤字は変更・追加箇所</small></div></div><div class="stats">${stat("attack", draft.attack)}<span>攻撃 / 体力</span>${stat("health", draft.health)}</div><div class="effect planned-effect">${blocks}${crest}<button type="button" class="add-block" data-action="add-effect-block">＋ 新規文章ブロック</button></div></article>`;
+  return `<article class="design-card legend-card plan-card"><div class="author-tab">${esc(draftName || meeting.base.name)}</div><div class="card-top"><span class="cost ${draft.cost !== meeting.base.cost ? "changed-value" : ""}">${draft.cost}</span><div><p class="card-class">${esc(meeting.base.class)}</p><small class="plan-note">赤字は変更・追加箇所</small></div></div><div class="stats">${stat("attack", draft.attack)}<span>攻撃 / 体力</span>${stat("health", draft.health)}</div><div class="effect planned-effect">${blocks}${modes}${crest}<button type="button" class="add-block" data-action="add-effect-block">＋ 新規文章ブロック</button></div></article>`;
 }
 root.addEventListener("click", async event => {
   const card = event.target.closest("[data-redraw-card]");

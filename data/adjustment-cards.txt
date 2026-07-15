@@ -575,9 +575,7 @@ id: a111
 category: 効果
 name: モード
 text: このカードに【モード】を追加する。
-（１）
-（２）
-選択肢となる能力は、他の調整カードを用いて作る。
+creates: mode_blocks
 
 id: a112
 category: 効果

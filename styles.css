@@ -132,6 +132,7 @@ button:disabled{cursor:not-allowed;opacity:.58}
 .crest-effect-slot small { display:block; color:#8b4038; font:900 .58rem monospace; letter-spacing:.12em; }
 .crest-effect-slot b { display:block; margin:.1rem 0; font:700 .85rem "Kaisei Decol",serif; }.crest-effect-slot span { display:block; font-size:.82rem; }.crest-effect-slot i { color:#806f59; }
 .crest-effect-slot.targetable { cursor:pointer; outline:2px dashed #b64035; outline-offset:2px; }.crest-effect-slot.targetable:hover { background:#ffe4b0; transform:translateX(3px); }
+.mode-effect-block { border-left:5px solid #a76f2e; background:#fff5d8; }.mode-effect-block small { color:#8e5d25; }.mode-effect-block.targetable:hover { background:#ffe3a0; }
 .add-block { padding:.55rem; color:#6d251f; background:#fff4d8; border:1px dashed #9d302d; font-weight:800; }
 
 /* 原案は別掲せず、完成予定に差分を赤字で重ねる */
