@@ -288,7 +288,7 @@ root.addEventListener("click", event => {
     const action = button.dataset.action;
     if (action === "choose-adjustment") { const card = adjustmentPool().find(item => (item.instanceId || item.id) === button.dataset.adjustmentId); if (!card) throw new Error("調整カードが見つかりません。"); ensureApplicationLimit(card); if (card.category === "数値" && !numericCardNeedsTarget(card.id)) { addNumericApplication(editor, card, [], {}); selectedAdjustmentId = null; pendingTargets = []; pendingDeltas = {}; pendingChoice = ""; render(); return; } selectedAdjustmentId = button.dataset.adjustmentId; pendingTargets = []; pendingDeltas = {}; pendingChoice = ""; render(); return; }
     if (action === "cancel-adjustment") { selectedAdjustmentId = null; pendingTargets = []; pendingDeltas = {}; pendingChoice = ""; render(); return; }
-    if (action === "remove-application") { removeApplication(editor, Number(button.dataset.applicationIndex)); selectedAdjustmentId = null; pendingTargets = []; pendingDeltas = {}; pendingChoice = ""; render(); return; }
+    if (action === "remove-application") { const cancelled = removeApplication(editor, Number(button.dataset.applicationIndex)); if (cancelled.length) notice = "対象の本文が消えたため、関連する数値調整も取り消しました。"; selectedAdjustmentId = null; pendingTargets = []; pendingDeltas = {}; pendingChoice = ""; render(); return; }
     if (action === "apply-numeric") {
       const card = selectedAdjustment(); ensureApplicationLimit(card);
       const deltas = Object.fromEntries([...document.querySelectorAll("[data-delta-target]")].map(input => [input.dataset.deltaTarget, Number(input.value || 0)]));
