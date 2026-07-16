@@ -22,7 +22,10 @@ const esc = value => String(value ?? "").replace(/[&<>"']/g, char => ({ "&": "&a
 const nl = value => esc(value).replace(/\n/g, "<br>");
 function adjustmentDisplayText(card) {
   const cardName = draftName || meeting?.base?.name || "このカード";
-  return card.auto === "crest_card_name" ? card.text.replace("※このカードのカード名", cardName) : card.text;
+  const baseName = meeting?.base?.name || "ベースカード";
+  if (card.auto === "crest_card_name") return card.text.replace("※このカードのカード名", cardName);
+  if (card.auto === "base_card_name") return card.text.replace("※ベースカード名", baseName);
+  return card.text;
 }
 const mine = () => Boolean(meeting?.private?.isActivePlayer);
 const host = () => Boolean(meeting?.viewer?.isHost);
@@ -83,7 +86,7 @@ function numericPicker(selected) {
   const selectedIds = new Set(pendingTargets);
   const simple = ["a2", "a3", "a4", "a7", "a13", "a14"].includes(selected.id);
   const countHint = { a1:"1〜3個",a2:"1個",a3:"1個",a4:"1個",a5:"攻撃力か体力",a6:"選択不要",a7:"1個",a8:"2個（先→後）",a9:"2個",a10:"1個以上",a11:"1個以上",a12:"2個（+2→-2）",a13:"1個",a14:"効果内1個" }[selected.id] || "対象を選択";
-  return `<section class="placement-panel paper"><p class="eyebrow">NUMERIC PLACEMENT</p><h3>${esc(selected.name)} <small>${esc(countHint)}</small></h3><p>${esc(selected.text)}</p>${selected.id === "a3" ? `<div class="choice-row compact-choice"><label class="radio-card"><input type="radio" name="numeric-delta" value="1" checked><b>＋1</b></label><label class="radio-card"><input type="radio" name="numeric-delta" value="-1"><b>−1</b></label></div>` : ""}<div class="target-grid">${targets.map(target => `<div class="number-target ${selectedIds.has(target.id) ? "selected" : ""}"><button type="button" data-number-target="${target.id}"><b>${esc(target.label)}</b><strong>${target.value}</strong></button>${["a10","a11"].includes(selected.id) && selectedIds.has(target.id) ? `<label>配分<input aria-label="${esc(target.label)}への振り分け" data-delta-target="${target.id}" type="number" value="${pendingDeltas[target.id] ?? 0}"></label>` : ""}</div>`).join("")}</div><div class="placement-actions"><button type="button" class="secondary" data-action="cancel-adjustment">選び直す</button><button type="button" class="primary" data-action="apply-numeric">この数値配置を反映</button></div></section>`;
+  return `<section class="placement-panel paper"><p class="eyebrow">NUMERIC PLACEMENT</p><h3>${esc(selected.name)} <small>${esc(countHint)}</small></h3><p>${esc(selected.text)}</p>${selected.id === "a3" ? `<div class="choice-row compact-choice"><label class="radio-card"><input type="radio" name="numeric-delta" value="1" checked><b>＋1</b></label><label class="radio-card"><input type="radio" name="numeric-delta" value="-1"><b>−1</b></label></div>` : ""}<div class="target-grid">${targets.map(target => `<div class="number-target ${selectedIds.has(target.id) ? "selected" : ""}"><button type="button" data-number-target="${target.id}"><b>${esc(target.label)}</b><strong>${target.value}</strong></button>${selectedIds.has(target.id) ? (selected.id === "a10" ? `<label>配分<input aria-label="${esc(target.label)}への振り分け" data-delta-target="${target.id}" type="number" min="1" step="1" value="${pendingDeltas[target.id] ?? 1}"></label>` : selected.id === "a11" ? `<label>配分<input aria-label="${esc(target.label)}への振り分け" data-delta-target="${target.id}" type="number" max="-1" step="1" value="${pendingDeltas[target.id] ?? -1}"></label>` : "") : ""}</div>`).join("")}</div><div class="placement-actions"><button type="button" class="secondary" data-action="cancel-adjustment">選び直す</button><button type="button" class="primary" data-action="apply-numeric">この数値配置を反映</button></div></section>`;
 }
 function effectPlacementPicker(selected, hasCrestEffect, hasModeBlocks) {
   const choices = selected.choices || [];

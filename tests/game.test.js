@@ -57,7 +57,7 @@ test("管理用JSONは固定IDと必須項目を保つ", () => {
     assert.ok(card.name && card.text);
     assert.ok(categories.has(card.category));
     assert.ok(Number.isInteger(card.copies) && card.copies >= 1);
-    assert.equal(card.text.includes("※"), card.auto === "crest_card_name");
+    assert.equal(card.text.includes("※"), ["crest_card_name", "base_card_name"].includes(card.auto));
     const creates = card.id === "a126" ? "crest_effect" : card.id === "a111" ? "mode_blocks" : undefined;
     assert.equal(card.creates, creates);
     if (card.choices) assert.ok(Array.isArray(card.choices) && card.choices.length >= 2);

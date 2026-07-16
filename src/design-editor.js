@@ -55,7 +55,7 @@ function numeric(state, app) {
   else if (id === "a7") { add(0, 3); one(); }
   else if (id === "a8") { assert(targets.length === 2 && targets[0] !== targets[1], "均整化は異なる2個の数字を選びます。"); at(0).set(at(1).get()); }
   else if (id === "a9") { assert(targets.length === 2 && targets[0] !== targets[1], "エクスチェンジは異なる2個の数字を選びます。"); const first = at(0), second = at(1), value = first.get(); first.set(second.get()); second.set(value); }
-  else if (id === "a10" || id === "a11") { assert(targets.length, "数値の適用先を選んでください。"); const sum = targets.reduce((total, key) => total + Number(params.deltas?.[key] || 0), 0); assert(sum === (id === "a10" ? 3 : -3), "振り分けの合計が正しくありません。"); targets.forEach((key, i) => add(i, Number(params.deltas[key] || 0))); }
+  else if (id === "a10" || id === "a11") { assert(targets.length, "数値の適用先を選んでください。"); const deltas = targets.map(key => Number(params.deltas?.[key] || 0)); assert(deltas.every(delta => Number.isInteger(delta) && (id === "a10" ? delta > 0 : delta < 0)), id === "a10" ? "数値プラスは各対象へ+1以上を割り振ります。" : "数値マイナスは各対象へ-1以下を割り振ります。"); const sum = deltas.reduce((total, delta) => total + delta, 0); assert(sum === (id === "a10" ? 3 : -3), "振り分けの合計が正しくありません。"); targets.forEach((_, i) => add(i, deltas[i])); }
   else if (id === "a12") { assert(targets.length === 2 && targets[0] !== targets[1], "数値移植は異なる2個の数字を選びます。"); add(0, 2); add(1, -2); }
   else if (id === "a13") { const item = one(); item.set(Math.floor(item.get() / 2)); }
   else if (id === "a14") { assert(targets.length === 1 && /^(block|app):/u.test(targets[0]), "倍プッシュは効果内の数字を選びます。"); const item = one(); item.set(item.get() * 2); }
@@ -66,6 +66,7 @@ function applicationText(state, app) {
   let text = app.text;
   if (app.auto === "enhance_cost_plus_2") text = text.replace("X", String(state.cost + 2));
   else if (app.auto === "crest_card_name") text = text.replace("※このカードのカード名", state.cardName);
+  else if (app.auto === "base_card_name") text = text.replace("※ベースカード名", state.editor.base.name);
   else if (app.params?.choice) text = text.replace(/【[^】]+】/u, `【${app.params.choice}】`);
   return Number.isInteger(app.applicationId) ? replaceEditedNumbers(text, state, `app:${app.applicationId}`) : text;
 }
