@@ -233,12 +233,16 @@ test("4ラウンド決選の看板ボーナスはヤバすぎ補正を受けず3
   assert.equal(getRankings(game)[0].id, "p1");
 });
 
-test("次ラウンドへ進み、最終ラウンド後は決選へ", () => {
+test("次ラウンドは手札を全て捨てて5枚引き直し、最終ラウンド後は決選へ", () => {
   const game = createGame({ names, rounds: 4, rng });
+  const previousHands = game.players.flatMap(player => player.hand);
   game.stage = "round_results";
   continueAfterRound(game);
   assert.equal(game.round, 2);
   assert.equal(game.stage, "round_reveal");
+  assert.deepEqual(game.players.map(player => player.hand.length), [5, 5, 5]);
+  assert.ok(previousHands.every(cardId => game.adjustmentDiscard.includes(cardId)));
+  assert.ok(game.players.every(player => player.hand.every(cardId => !previousHands.includes(cardId))));
   game.round = 4;
   game.stage = "round_results";
   continueAfterRound(game);

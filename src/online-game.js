@@ -43,6 +43,13 @@ function refillHands(state) {
   }
 }
 
+function replaceRoundHands(state) {
+  for (const player of state.players) {
+    state.adjustmentDiscard.push(...player.hand);
+    player.hand = [];
+  }
+  refillHands(state);
+}
 function nextBase(state) {
   if (!state.baseDeck.length) state.baseDeck = shuffle(BASE_CARDS.map(card => card.id), state.rng || Math.random);
   return state.baseDeck.shift();
@@ -114,7 +121,6 @@ function calculateRound(state) {
   });
   state.adjustmentDiscard.push(...state.roundUsedAdjustments);
   state.roundUsedAdjustments = [];
-  refillHands(state);
   state.stage = "round_results";
 }
 
@@ -301,6 +307,7 @@ export function continueOnlineRound(state, playerId = state.hostId) {
     return;
   }
   state.round += 1;
+  replaceRoundHands(state);
   state.currentBaseId = nextBase(state);
   state.designs = [];
   state.redrawCounts = {};
